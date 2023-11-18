@@ -5,39 +5,34 @@ class Board:
         self.m = m
         self.n = n
         self.k = k
-        self.array = np.zeros((self.m, self.n))
+        self.array = np.zeros((self.n, self.m))
     
     def display(self):
         print(self.array)
         
     def has_won(self):
+        win = False
         # Horizontal win
-        for row in range(self.m):
-            if self.array[row][0] == self.array[row][1] == self.array[row][2] == self.array[row][3]\
-                and (self.array[row][0] and self.array[row][1] and self.array[row][2] and self.array[row][3]) != 0:
-                return True, f"col win in column {row+1}"
-            if self.array[row][1] == self.array[row][2] == self.array[row][3] == self.array[row][4]\
-                and (self.array[row][1] and self.array[row][2] and self.array[row][3] and self.array[row][4]) != 0:
-                return True, f"col win in column {row+1}"
+        for row in range(self.n):
+            for col in range(self.m - self.k + 1):
+                if all(self.array[row][col + i] == self.array[row][col] and self.array[row][col] != 0 for i in range(1, self.k)):
+                    win = True
+
+        # Check columns
+        for col in range(self.m):
+            for row in range(self.n - self.k + 1):
+                if all(self.array[row + i][col] == self.array[row][col] and self.array[row][col] != 0 for i in range(1, self.k)):
+                    win = True
         
-        # Vertical win
-        for col in range(self.n):
-            if self.array[0][col] == self.array[1][col] == self.array[2][col] == self.array[3][col]\
-                and (self.array[0][col] and self.array[1][col] and self.array[2][col] and self.array[3][col]) != 0:
-                return True, f"col win in column {col+1}"
-            if self.array[1][col] == self.array[2][col] == self.array[row][3] == self.array[row][4]\
-                and (self.array[1][col] and self.array[2][col] and self.array[3][col] and self.array[4][col]) != 0:
-                return True, f"col win in column {col+1}"
+        # Check diagonal
+        for row in range(self.n - self.k + 1):
+            for col in range(self.m - self.k + 1):
+                if all(self.array[row + i][col + i] == self.array[row][col] and self.array[row][col] != 0 for i in range(1, self.k)):
+                    win = True
+
+        for row in range(self.n - self.k + 1):
+            for col in range(self.k - 1, self.m):
+                if all(self.array[row + i][col - i] == self.array[row][col] and self.array[row][col] != 0 for i in range(1, self.k)):
+                    win = True
         
-        # Diagonal win
-        for col in range(self.n-3):
-            if self.array[col][col] == self.array[col+1][col+1] == self.array[col+2][col+2] == self.array[col+3][col+3]\
-                and (self.array[col][col] and self.array[col+1][col+1] and self.array[col+2][col+2] and self.array[col+3][col+3]) != 0:
-                return True, "diag win"
-        for col in range(3, self.n):
-            if self.array[col][col] == self.array[col-1][col-1] == self.array[col-2][col-2] == self.array[col-3][col-3] \
-                and (self.array[col][col] and self.array[col-1][col-1] and self.array[col-2][col-2] and self.array[col-3][col-3]) != 0:
-                return True, "diag win"
-        
-        return False
-        
+        return win
