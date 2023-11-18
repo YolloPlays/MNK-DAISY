@@ -18,8 +18,9 @@ class Player(Board):
             else:
                 print ("Diese Position ist außerhalb des Spielfelds.")
                 
-# Aufruf der Methoden zum Spielen
-board = Board()
-player1 = Player("Klaus", 1)
-player1.make_move(board)
-board.display()
+if __name__ == "__main__":
+    # Aufruf der Methoden zum Spielen
+    board = Board()
+    player1 = Player("Klaus", 1)
+    player1.make_move(board)
+    board.display()
