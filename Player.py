@@ -5,7 +5,7 @@ class Player(Board):
         self.player_number = player_number
 
     
-    def make_move(self, board:Board):
+    def make_move(self, board):
         while True:
             m = int(input(f"{self.name}, bitte geben Sie die Zeile an: ")) - 1
             n = int(input(f"{self.name}, bitte geben Sie die Reihe an: ")) - 1
