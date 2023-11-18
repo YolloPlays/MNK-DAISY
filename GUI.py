@@ -6,25 +6,41 @@
 import tkinter as tk
 from faafo import Board # TODO. Replace with -import Board- for final merge
 from PIL import Image,ImageTk
+import itertools as it
 
 class GUI:
     
     def is_in_between(self, a,b,c):
         return b <= a <= c
+    
+    def in_boundaries(self, x, y):
+        return self.is_in_between(x,self.game_canvas.winfo_rootx(), self.game_canvas.winfo_rootx() + self.game_canvas.winfo_width()) and self.is_in_between(y, self.game_canvas.winfo_rooty(), self.game_canvas.winfo_rooty() + self.game_canvas.winfo_height())
 
     def handle_click(self, event: tk.Event):
-        pass
+        if self.in_boundaries(event.x_root, event.y_root):
+            for idx, i in enumerate(self.cartesian):
+                pass
+            pass
     
     def draw_grid(self):
         for i in range(1, self.board.m + 1):
             x = (400/(self.board.m + 1)) * i  + 29
             self.game_canvas.create_image(x, 36, image=self.stick_img, anchor="nw")
+            self.vertical_coords.append(x)
         for i in range(1, self.board.m + 1):
             y = (400/(self.board.m + 1)) * i  + 29
             self.game_canvas.create_image(36, y, image=self.stick_hori_img, anchor="nw")
+            self.horizontal_coords.append(y)
+        for i in it.product(self.vertical_coords, self.horizontal_coords):
+            self.cartesian.append(i)
+            
     
     def __init__(self, board: Board) -> None:
         self.board = board
+        
+        self.vertical_coords = []
+        self.horizontal_coords = []
+        self.cartesian = []
         
         self.root = tk.Tk()
         self.root.title("MNK")
