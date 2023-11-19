@@ -1,5 +1,5 @@
 from Board import Board
-class Player(Board):
+class Player():
     def __init__(self, name: str, player_number: int):
         self.name = name
         self.player_number = player_number
