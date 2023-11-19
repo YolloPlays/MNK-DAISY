@@ -8,12 +8,15 @@ import tkinter as tk
 import Board, Game
 from PIL import Image,ImageTk
 import itertools as it
+import pyglet
 
 class GUI:
     def __init__(self, game: Game) -> None:
         self.m = game.board.m
         self.n = game.board.n
         self.game = game
+        self.game.gui = self
+        pyglet.font.add_file('font\\Tr2n.ttf')
         
         self.vertical_coords = []
         self.horizontal_coords = []
@@ -48,6 +51,8 @@ class GUI:
         self.stick_img = tk.PhotoImage(file="images\\stick.png")
         self.cricle_red = tk.PhotoImage(file="images\\circle_red.png")
         self.cricle_blue = tk.PhotoImage(file="images\\circle_blue.png")
+        self.win_blue = tk.PhotoImage(file="images\\blue_won.png")
+        self.win_red = tk.PhotoImage(file="images\\red_won.png")
         
         self.draw_grid()
 
@@ -83,3 +88,12 @@ class GUI:
             self.horizontal_coords.append(y)
         for i in it.product(self.vertical_coords, self.horizontal_coords):
             self.cartesian.append(i)
+            
+    def display_win(self, player):
+        for widget in self.root.winfo_children():
+            widget.pack_forget()
+        winner_canvas = tk.Canvas(self.root, bg="#434343")
+        winner_canvas.pack(fill="both", expand=1)
+        winner_img, winner_txt = (self.win_blue, self.game.player1.name) if player else (self.win_red, self.game.player2.name)
+        winner_canvas.create_image(0, 0, image=winner_img, anchor="nw")
+        winner_canvas.create_text(200, 288, font=("TR2N",70), text=winner_txt, fill="white") # DEBUG

@@ -6,8 +6,8 @@ class Game:
         self.player1 = player1
         self.player2 = player2
         self.playerturn = True
-        self.gui = GUI.GUI(self)
-        
+        GUI.GUI(self)
+    
     def game_move(self, m, n):
         # TODO handle real play and player change handle win check
         # print(m, n) # <= Reality: player move # Debug
@@ -19,6 +19,7 @@ class Game:
             success = True
             self.playerturn = not self.playerturn
         # self.board.display() # DEBUG
+        self.gui.display_win(True) # DEBUG
         return (success, current_player_turn) # <= needed for gui to know whos players turn it was True: player1, False: player 2
         
         
