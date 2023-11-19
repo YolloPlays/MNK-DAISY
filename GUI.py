@@ -3,59 +3,23 @@
  @create date 18.11.2023
  @desc GUI for MNK
 """
-# TODO: handle_click
 
 import tkinter as tk
-# TODO. Replace with -import Board- for final merge
-import Board, Player
+import Board, Game
 from PIL import Image,ImageTk
 import itertools as it
 
 class GUI:
-    
-    def is_in_between(self, a,b,c):
-        return b <= a <= c
-    
-    def in_boundaries(self, x, y):
-        return self.is_in_between(x,self.game_canvas.winfo_rootx(), self.game_canvas.winfo_rootx() + self.game_canvas.winfo_width()) and self.is_in_between(y, self.game_canvas.winfo_rooty(), self.game_canvas.winfo_rooty() + self.game_canvas.winfo_height())
-    
-    def on_grid(self, event: tk.Event, i: tuple):
-        radius =30
-        return self.is_in_between(event.x, i[0]-radius, i[0]+radius) and self.is_in_between(event.y, i[1]-radius, i[1]+radius)
-
-    def handle_click(self, event: tk.Event):
-        if self.in_boundaries(event.x_root, event.y_root):
-            for idx, i in enumerate(self.cartesian):
-                if self.on_grid(event, i):
-                    # Proof of concept:
-                    # print(idx % self.board.n, int(idx/self.board.n))
-                    # self.player1.make_move(self.board, idx % self.board.n, int(idx/self.board.n))
-                    pass
-                    
-                    
-    
-    def draw_grid(self):
-        for i in range(1, self.board.m + 1):
-            x = (400/(self.board.m + 1)) * i  + 29
-            self.game_canvas.create_image(x, 36, image=self.stick_img, anchor="nw")
-            self.vertical_coords.append(x)
-        for i in range(1, self.board.n + 1):
-            y = (400/(self.board.n + 1)) * i  + 29
-            self.game_canvas.create_image(36, y, image=self.stick_hori_img, anchor="nw")
-            self.horizontal_coords.append(y)
-        for i in it.product(self.vertical_coords, self.horizontal_coords):
-            self.cartesian.append(i)
-            
-    
-    def __init__(self, board: Board, player1: Player, player2: Player) -> None:
-        self.board = board
+    def __init__(self, game: Game) -> None:
+        self.m = game.board.m
+        self.n = game.board.n
+        self.game = game
         
         self.vertical_coords = []
         self.horizontal_coords = []
         self.cartesian = []
         self.playersturn = True
-        self.player1: Player = player1
-        self.player2: Player = player2
+        self.game: Game = game
         self.root = tk.Tk()
         self.root.title("MNK")
         self.root.configure(bg="#434343")
@@ -89,5 +53,32 @@ class GUI:
 
         self.root.mainloop()
         
-if __name__ == "__main__":
-    GUI(Board.Board(m=7, n=7), Player("Klaus", 1), Player("Peter", 2))
+    def is_in_between(self, a,b,c):
+        return b <= a <= c
+    
+    def in_boundaries(self, x, y):
+        return self.is_in_between(x,self.game_canvas.winfo_rootx(), self.game_canvas.winfo_rootx() + self.game_canvas.winfo_width()) and self.is_in_between(y, self.game_canvas.winfo_rooty(), self.game_canvas.winfo_rooty() + self.game_canvas.winfo_height())
+    
+    def on_grid(self, event: tk.Event, i: tuple):
+        radius =30
+        return self.is_in_between(event.x, i[0]-radius, i[0]+radius) and self.is_in_between(event.y, i[1]-radius, i[1]+radius)
+
+    def handle_click(self, event: tk.Event):
+        if self.in_boundaries(event.x_root, event.y_root):
+            for idx, i in enumerate(self.cartesian):
+                if self.on_grid(event, i):
+                    self.game.game_move(idx % self.n, int(idx/self.n))
+                    # TODO: Draw the move
+                    self.game_canvas.create_oval(i[0], i[1], i[0]+20, i[1]+20, fill="red")
+    
+    def draw_grid(self):
+        for i in range(1, self.m + 1):
+            x = (400/(self.m + 1)) * i  + 29
+            self.game_canvas.create_image(x, 36, image=self.stick_img, anchor="nw")
+            self.vertical_coords.append(x)
+        for i in range(1, self.n + 1):
+            y = (400/(self.n + 1)) * i  + 29
+            self.game_canvas.create_image(36, y, image=self.stick_hori_img, anchor="nw")
+            self.horizontal_coords.append(y)
+        for i in it.product(self.vertical_coords, self.horizontal_coords):
+            self.cartesian.append(i)
