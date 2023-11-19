@@ -9,7 +9,7 @@ class Game:
         self.gui = GUI.GUI(self)
         
     def game_move(self, m, n):
-        # TODO handle real play and player change
+        # TODO handle real play and player change handle win check
         # print(m, n) # <= Reality: player move # Debug
         current_player_turn = self.playerturn
         current_player = self.player1 if current_player_turn else self.player2
