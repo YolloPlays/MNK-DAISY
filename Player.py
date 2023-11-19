@@ -12,13 +12,14 @@ class Player():
             n = (int(input(f"{self.name}, bitte geben Sie die Reihe an: ")) - 1) \
                 if n is None else n
             if 0 <= m < board.m and 0 <= n < board.n:
-                if board.array[m][n] == 0:
+                if board.array[m][n] == 0: # <= Only necessary for raw input. GUI and Game handles this excption already
                     board.array[m][n] = self.player_number
                     return board.array[m][n]
                 else:
                     print('Dieser Punkt ist bereits besetzt!')
             else:
                 print ("Diese Position ist außerhalb des Spielfelds.")
+        
                 
 if __name__ == "__main__":
     # Aufruf der Methoden zum Spielen
