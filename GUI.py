@@ -69,8 +69,9 @@ class GUI:
         if self.in_boundaries(event.x_root, event.y_root):
             for idx, i in enumerate(self.cartesian):
                 if self.on_grid(event, i):
-                    playerturn = self.game.game_move(idx % self.n, int(idx/self.n))
-                    self.game_canvas.create_image(i[0]-22, i[1]-22, image=self.cricle_blue if playerturn else self.cricle_red, anchor="nw")    
+                    results = self.game.game_move(idx % self.n, int(idx/self.n))
+                    if results[0]:
+                        self.game_canvas.create_image(i[0]-22, i[1]-22, image=self.cricle_blue if results[1] else self.cricle_red, anchor="nw")    
     def draw_grid(self):
         for i in range(1, self.m + 1):
             x = (400/(self.m + 1)) * i  + 29
