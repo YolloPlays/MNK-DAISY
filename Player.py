@@ -8,9 +8,9 @@ class Player():
     def make_move(self, board, m = None, n = None):
         while True:
             m = (int(input(f"{self.name}, bitte geben Sie die Zeile an: ")) - 1) \
-                if m is None else m - 1
+                if m is None else m
             n = (int(input(f"{self.name}, bitte geben Sie die Reihe an: ")) - 1) \
-                if n is None else n - 1
+                if n is None else n
             if 0 <= m < board.m and 0 <= n < board.n:
                 if board.array[m][n] == 0:
                     board.array[m][n] = self.player_number
