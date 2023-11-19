@@ -46,6 +46,8 @@ class GUI:
         
         self.stick_hori_img = tk.PhotoImage(file="images\\stick-hori.png")
         self.stick_img = tk.PhotoImage(file="images\\stick.png")
+        self.cricle_red = tk.PhotoImage(file="images\\circle_red.png")
+        self.cricle_blue = tk.PhotoImage(file="images\\circle_blue.png")
         
         self.draw_grid()
 
@@ -67,10 +69,8 @@ class GUI:
         if self.in_boundaries(event.x_root, event.y_root):
             for idx, i in enumerate(self.cartesian):
                 if self.on_grid(event, i):
-                    self.game.game_move(idx % self.n, int(idx/self.n))
-                    # TODO: Draw the move
-                    self.game_canvas.create_oval(i[0], i[1], i[0]+20, i[1]+20, fill="red")
-    
+                    playerturn = self.game.game_move(idx % self.n, int(idx/self.n))
+                    self.game_canvas.create_image(i[0]-22, i[1]-22, image=self.cricle_blue if playerturn else self.cricle_red, anchor="nw")    
     def draw_grid(self):
         for i in range(1, self.m + 1):
             x = (400/(self.m + 1)) * i  + 29

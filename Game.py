@@ -9,7 +9,8 @@ class Game:
         
     def game_move(self, m, n):
         # TODO handle real play and player change
-        print(m, n)
+        print(m, n) # <= Reality do board manipulation
+        return True # <= needed for gui to now whos players turn it was True: player1, False: player 2
         
         
         
