@@ -16,6 +16,7 @@ class GUI:
         self.n = game.board.n
         self.game = game
         self.game.gui = self
+        pyglet.options['win32_gdi_font'] = True # Necessary for tkinter quirk
         pyglet.font.add_file('font\\Tr2n.ttf')
         
         self.vertical_coords = []
@@ -96,4 +97,10 @@ class GUI:
         winner_canvas.pack(fill="both", expand=1)
         winner_img, winner_txt = (self.win_blue, self.game.player1.name) if player else (self.win_red, self.game.player2.name)
         winner_canvas.create_image(0, 0, image=winner_img, anchor="nw")
-        winner_canvas.create_text(200, 288, font=("TR2N",70), text=winner_txt, fill="white") # DEBUG
+        winner_canvas.create_text(263, 295, font=("TR2N",62), text=winner_txt, fill="white")
+        
+        
+        
+if __name__ == "__main__":
+    import Player
+    Game.Game(Board.Board(), Player.Player("Klaus", 1), Player.Player("Peter", 2))
