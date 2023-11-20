@@ -17,7 +17,7 @@ class Game:
         current_player = self.player1 if current_player_turn else self.player2
         success = False
         chip_at=None
-        if self.board.array[m][n] == 0:
+        if self.board.array[m][n] == 0 or isinstance(current_player, MyBot.Bot):
             chip_at = current_player.make_move(self.board, m, n)
             success = True
             self.playerturn = not self.playerturn
@@ -43,5 +43,5 @@ class Game:
         
         
 if __name__ == "__main__":
-    game = Game(Board.Board(), Player.Player("Klaus", 1), Player.Player("Peter", 2))
+    game = Game(Board.Board(), Player.Player("Klaus", 1))
     game.start()

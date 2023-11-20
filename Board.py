@@ -9,6 +9,7 @@ class Board:
     
     def display(self):
         print(self.array)
+        print()
         
     def has_won(self):
         win = 0
