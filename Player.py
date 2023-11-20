@@ -13,8 +13,8 @@ class Player():
                 if n is None else n
             if 0 <= m < board.m and 0 <= n < board.n:
                 if board.array[m][n] == 0: # <= Only necessary for raw input. GUI and Game handles this excption already
-                    board.array[m][n] = self.player_number
-                    return board.array[m][n]
+                    board.array[m][n] = self.player_number # Set methode im Board
+                    return (m,n)
                 else:
                     print('Dieser Punkt ist bereits besetzt!')
             else:
