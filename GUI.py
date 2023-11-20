@@ -45,7 +45,7 @@ class GUI:
         self.win_red = tk.PhotoImage(file="images\\red_won.png")
         
         self.start_button = tk.Button(self.root, bg="blue", command=self.init_game, text="Start")
-        self.start_button.pack(padx=100, pady=100, fill="both")
+        self.start_button.pack(padx=100, pady=100, fill="both", expand=1)
         # self.init_game() # Debug
 
         self.root.bind("<1>", self.handle_click)
@@ -54,7 +54,7 @@ class GUI:
         
     def init_game(self):
         self.game_started = True
-        self.game: Game = Game.Game(Board.Board(), Player.Player("Ric", 1), Player.Player("Jannis", 2))
+        self.game: Game = Game.Game(Board.Board(), Player.Player("Jannis", 1)) # DEBUG: Will later be replaced by buttons
         self.m = self.game.board.m
         self.n = self.game.board.n
         self.game.gui = self
@@ -84,12 +84,14 @@ class GUI:
         if self.game_started and self.in_boundaries(event.x_root, event.y_root):
             for idx, i in enumerate(self.cartesian):
                 if self.on_grid(event, i):
-                    results = self.game.game_move(idx % self.m, int(idx/self.m))
+                    results = self.game.game_move(idx % self.n, int(idx/self.n))
                     self.draw_chip(results)
                     if winner:=self.game.board.has_won():
                         self.display_win(winner-1)
-                    if self.game.bot_game and (results_bot:=self.game.player2.make_move()):
-                        self.draw_chip((True, True, results_bot))
+                    if self.game.bot_game:
+                        self.root.after(600, self.draw_chip, self.game.game_move(0,0))
+                        # self.draw_chip(self.game.game_move(0,0)) DEBUG: Without delay
+                        
                         
     def draw_game(self):
         self.game_canvas = tk.Canvas(self.game_frame, width=472, height=472, bg="#434343", highlightthickness=0)
