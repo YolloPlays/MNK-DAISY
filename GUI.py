@@ -84,7 +84,7 @@ class GUI:
         if self.game_started and self.in_boundaries(event.x_root, event.y_root):
             for idx, i in enumerate(self.cartesian):
                 if self.on_grid(event, i):
-                    results = self.game.game_move(idx % self.n, int(idx/self.n))
+                    results = self.game.game_move(idx % self.m, int(idx/self.m))
                     self.draw_chip(results)
                     if winner:=self.game.board.has_won():
                         self.display_win(winner-1)
@@ -109,11 +109,11 @@ class GUI:
         for i in range(1, self.m + 1):
             x = (400/(self.m + 1)) * i  + 29
             self.game_canvas.create_image(x, 36, image=self.stick_img, anchor="nw")
-            self.vertical_coords.append(x)
+            self.horizontal_coords.append(x)
         for i in range(1, self.n + 1):
             y = (400/(self.n + 1)) * i  + 29
             self.game_canvas.create_image(36, y, image=self.stick_hori_img, anchor="nw")
-            self.horizontal_coords.append(y)
+            self.vertical_coords.append(y)
         for i in it.product(self.vertical_coords, self.horizontal_coords):
             self.cartesian.append(i)
             
