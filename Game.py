@@ -8,6 +8,7 @@ class Game:
         self.bot_game = isinstance(player2, MyBot.Bot)
         self.playerturn = True
         self.gui = None
+        self.game_started = False
     
     def game_move(self, m, n):
         # TODO handle real play and player change handle win check
@@ -24,7 +25,23 @@ class Game:
         # self.gui.display_win(False) # DEBUG
         return (success, current_player_turn, chip_at) # <= needed for gui to know whos players turn it was True: player1, False: player 2
         
+     
+    def start(self):
+        self.game_started = True
+        if self.gui == None: # <= Backwards compatibility for raw input
+            self.game_loop()
+        
+    def game_loop(self):
+        while self.game_started and not self.board.has_won():
+            player = self.player1 if self.playerturn else self.player2
+            player.make_move(self.board)
+            self.board.display()
+            self.playerturn = not self.playerturn
+        winner = self.player2 if self.board.has_won()-1 else self.player1
+        print(f"{winner.name} has won")
+            
         
         
 if __name__ == "__main__":
-    Game(Board.Board(3,6), Player.Player("Klaus", 1))
+    game = Game(Board.Board(), Player.Player("Klaus", 1), Player.Player("Peter", 2))
+    game.start()
