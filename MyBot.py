@@ -3,13 +3,15 @@ from Player import Player
 from Board import Board
 
 class Bot(Player):
-    def __init__(self, name: str, player_number: int):
-        super().__init__(name, player_number)
+    def __init__(self):
+        super().__init__("KI", 2)
 
     def make_move(self, board):
-        for row in range(board.n):
-            for col in range(board.m):
-                if board[row][col] == 0: # empty cell
+        empty_cells = []
+        for col in range(board.m):
+            for row in range(board.n):
+                empty_cells.append((row,col)) if board[row][col] == 0 else None
+                    
             
             
             m = randint # TODO add numbers
