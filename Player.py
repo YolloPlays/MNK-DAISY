@@ -17,8 +17,12 @@ class Player():
                     return (m,n)
                 else:
                     print('Dieser Punkt ist bereits besetzt!')
+                    m = None
+                    n = None
             else:
                 print ("Diese Position ist außerhalb des Spielfelds.")
+                m = None
+                n = None
         
                 
 if __name__ == "__main__":
