@@ -1,18 +1,18 @@
 from random import randint
 from Player import Player
+from Board import Board
 
 class Bot(Player):
-    pass
+    def __init__(self, name: str, player_number: int):
+        super().__init__(name, player_number)
 
     def make_move(self, board):
-        while True:
+        for row in range(board.n):
+            for col in range(board.m):
+                if board[row][col] == 0: # empty cell
+            
+            
             m = randint # TODO add numbers
             n = randint
-            if 0 <= m < board.m and 0 <= n < board.n:
-                if board.array[m][n] == 0:
-                    board.array[m][n] = self.player_number
-                    return board.array[m][n]
-                else:
-                    print('Dieser Punkt ist bereits besetzt!')
-            else:
-                print ("Diese Position ist außerhalb des Spielfelds.")
+            
+            
