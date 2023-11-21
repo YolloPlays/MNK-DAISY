@@ -5,7 +5,7 @@ class Game:
         self.board = board
         self.player1 = player1
         self.player2 = player2
-        self.bot_game = isinstance(player2, MyBot2.Bot)
+        self.bot_game = player2.is_bot
         self.playerturn = True
         self.gui = None
         self.game_started = False
@@ -17,7 +17,7 @@ class Game:
         current_player = self.player1 if current_player_turn else self.player2
         success = False
         chip_at=None
-        if self.board.array[m][n] == 0 or isinstance(current_player, MyBot2.Bot):
+        if self.board.array[m][n] == 0 or self.bot_game:
             chip_at = current_player.make_move(self.board, m, n)
             success = True
             self.playerturn = not self.playerturn
