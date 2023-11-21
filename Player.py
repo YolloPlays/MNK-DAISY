@@ -8,13 +8,13 @@ class Player():
     
     def make_move(self, board, m = None, n = None):
         while True:
-            m = (int(input(f"{self.name}, bitte geben Sie die Zeile an: ")) - 1) \
-                if m is None else m
-            n = (int(input(f"{self.name}, bitte geben Sie die Reihe an: ")) - 1) \
+            n = (int(input(f"{self.name}, bitte geben Sie die Zeile an: ")) - 1) \
                 if n is None else n
+            m = (int(input(f"{self.name}, bitte geben Sie die Reihe an: ")) - 1) \
+                if m is None else m
             if 0 <= m < board.m and 0 <= n < board.n:
-                if board.array[m][n] == 0: # <= Only necessary for raw input. GUI and Game handles this excption already
-                    board.array[m][n] = self.player_number # Set methode im Board
+                if board.array[n][m] == 0: # <= Only necessary for raw input. GUI and Game handles this excption already
+                    board.array[n][m] = self.player_number # Set methode im Board
                     return (m,n)
                 else:
                     print('Dieser Punkt ist bereits besetzt!')

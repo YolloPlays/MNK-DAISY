@@ -89,7 +89,7 @@ class GUI:
     
     def draw_chip(self, results):
         if results[0]:
-            n = (results[2][1])*5 + results[2][0]
+            n = (results[2][0])*5 + results[2][1]
             i = self.cartesian[n]
             self.game_canvas.create_image(i[0]-22, i[1]-22, image=self.cricle_blue if results[1] else self.cricle_red, anchor="nw")
 
@@ -97,14 +97,14 @@ class GUI:
         if self.game_started and self.in_boundaries(event.x_root, event.y_root) and not self.move_blocked:
             for idx, i in enumerate(self.cartesian):
                 if self.on_grid(event, i):
-                    results = self.game.game_move(idx % self.n, int(idx/self.n))
+                    results = self.game.game_move(int(idx/self.n), idx % self.n)
                     self.move_blocked = True
                     self.draw_chip(results)
                     self.root.after(700, self.toggle_block)
                     if winner:=self.game.board.has_won():
                         self.root.after(1200, self.display_win, winner-1)
                         # self.display_win(winner-1)
-                    elif self.game.bot_game:
+                    elif self.game.is_bot():
                         self.root.after(600, self.draw_chip, self.game.game_move(0,0))
                         # self.draw_chip(self.game.game_move(0,0)) DEBUG: Without delay
                         
@@ -126,7 +126,7 @@ class GUI:
     def draw_grid(self):
         self.draw_rows()
         self.draw_cols()
-        for i in it.product(self.vertical_coords, self.horizontal_coords):
+        for i in it.product(self.horizontal_coords, self.vertical_coords):
             self.cartesian.append(i)
             
     def draw_cols(self):
