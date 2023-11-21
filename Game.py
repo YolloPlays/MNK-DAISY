@@ -1,11 +1,11 @@
-import GUI, Board, Player, MyBot
+import GUI, Board, Player, MyBot, MyBot2
 
 class Game:
-    def __init__(self, board:Board, player1:Player, player2 :Player  = MyBot.Bot()) -> None:
+    def __init__(self, board:Board, player1:Player, player2 :Player  = MyBot2.Bot()) -> None:
         self.board = board
         self.player1 = player1
         self.player2 = player2
-        self.bot_game = isinstance(player2, MyBot.Bot)
+        self.bot_game = isinstance(player2, MyBot2.Bot)
         self.playerturn = True
         self.gui = None
         self.game_started = False
@@ -17,7 +17,7 @@ class Game:
         current_player = self.player1 if current_player_turn else self.player2
         success = False
         chip_at=None
-        if self.board.array[m][n] == 0 or isinstance(current_player, MyBot.Bot):
+        if self.board.array[m][n] == 0 or isinstance(current_player, MyBot2.Bot):
             chip_at = current_player.make_move(self.board, m, n)
             success = True
             self.playerturn = not self.playerturn
@@ -45,3 +45,4 @@ class Game:
 if __name__ == "__main__":
     game = Game(Board.Board(), Player.Player("Klaus", 1))
     game.start()
+    
