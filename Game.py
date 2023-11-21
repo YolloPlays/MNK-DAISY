@@ -17,7 +17,7 @@ class Game:
         current_player = self.player1 if current_player_turn else self.player2
         success = False
         chip_at=None
-        if self.board.array[m][n] == 0 or self.bot_game:
+        if self.board.array[n][m] == 0 or self.bot_game:
             chip_at = current_player.make_move(self.board, m, n)
             success = True
             self.playerturn = not self.playerturn
@@ -45,4 +45,3 @@ class Game:
 if __name__ == "__main__":
     game = Game(Board.Board(), Player.Player("Klaus", 1))
     game.start()
-    

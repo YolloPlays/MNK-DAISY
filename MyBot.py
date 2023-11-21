@@ -8,13 +8,18 @@ class Bot(Player):
         self.is_bot = True
 
     def make_move(self, board, m=None, n=None):
+        """_summary_
+
+        Returns:
+            Tuple: (m,n)
+        """
         empty_cells = []
         for col in range(board.m):
             for row in range(board.n):
                 empty_cells.append((row,col)) if board.array[row][col] == 0 else None
         
         # Randomly select a cell to place the disc
-        m, n = choice(empty_cells)
+        n, m = choice(empty_cells)
         return super().make_move(board, m, n)
 
 if __name__ == "__main__":
