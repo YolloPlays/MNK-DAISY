@@ -21,8 +21,8 @@ class GUI:
             pyglet.options['win32_gdi_font'] = True # Necessary for tkinter quirk
             pyglet.font.add_file(r'font\Tr2n.ttf')
         else:
-            for path in paths:
-                path = path.replace("\\", "/")
+            for idx, path in enumerate(paths):
+                paths[idx] = path.replace("\\", "/")
             
         self.game_started = False
         self.move_blocked = False
