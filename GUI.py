@@ -8,17 +8,24 @@ import tkinter as tk
 import Board, Game, Player
 from PIL import Image,ImageTk
 import itertools as it
-import pyglet
 import platform
 
 # TODO: Let GUI make game. start button needed 
 
 class GUI:
     def __init__(self) -> None:
+        paths = [r"images\LightBig.png", r"images\LightSmall.png", r"images\stick-hori.png", r"images\stick.png",
+                    r"images\circle_red.png", r"images\circle_blue.png", r"images\blue_won.png", r"images\red_won.png"]
         if platform.system() == "Windows":
+            import pyglet
             pyglet.options['win32_gdi_font'] = True # Necessary for tkinter quirk
-            pyglet.font.add_file('font\\Tr2n.ttf')
+            pyglet.font.add_file(r'font\Tr2n.ttf')
+        else:
+            for path in paths:
+                path = path.replace("\\", "/")
+            
         self.game_started = False
+        self.move_blocked = False
         self.vertical_coords = []
         self.horizontal_coords = []
         self.cartesian = []
@@ -30,27 +37,33 @@ class GUI:
         self.game_frame = tk.Frame(self.root, bg="#434343")
         self.game_frame.pack(padx=64, pady=64, side="left", fill="both")
 
-        self.game_img = tk.PhotoImage(file="images\\LightBig.png")
+        self.game_img = tk.PhotoImage(file=paths[0])
 
         self.stats_frame = tk.Frame(self.root, bg="#434343")
         self.stats_frame.pack(padx=20, pady=64, side="right", fill="both")
 
-        self.stats_img = tk.PhotoImage(file="images\\LightSmall.png")
+        self.stats_img = tk.PhotoImage(file=paths[1])
         
-        self.stick_hori_img = tk.PhotoImage(file="images\\stick-hori.png")
-        self.stick_img = tk.PhotoImage(file="images\\stick.png")
-        self.cricle_red = tk.PhotoImage(file="images\\circle_red.png")
-        self.cricle_blue = tk.PhotoImage(file="images\\circle_blue.png")
-        self.win_blue = tk.PhotoImage(file="images\\blue_won.png")
-        self.win_red = tk.PhotoImage(file="images\\red_won.png")
+        self.stick_hori_img = tk.PhotoImage(file=paths[2])
+        self.stick_img = tk.PhotoImage(file=paths[3])
+        self.cricle_red = tk.PhotoImage(file=paths[4])
+        self.cricle_blue = tk.PhotoImage(file=paths[5])
+        self.win_blue = tk.PhotoImage(file=paths[6])
+        self.win_red = tk.PhotoImage(file=paths[7])
         
         self.start_button = tk.Button(self.root, bg="blue", command=self.init_game, text="Start")
         self.start_button.pack(padx=100, pady=100, fill="both", expand=1)
         # self.init_game() # Debug
 
         self.root.bind("<1>", self.handle_click)
+        self.root.bind("<space>", self.delete_rows) #DEBUG
 
         self.root.mainloop()
+        
+    def delete_rows(self, event): #DEBUG
+        self.game_canvas.delete("row")
+    def delete_cols(self, event):
+        self.game_canvas.delete("col")
         
     def init_game(self):
         self.game_started = True
@@ -62,7 +75,7 @@ class GUI:
         self.playersturn = True
         self.start_button.destroy()
         self.draw_game()
-        self.draw_grid()    
+        self.draw_grid()
     
     def is_in_between(self, a,b,c):
         return b <= a <= c
@@ -81,14 +94,17 @@ class GUI:
             self.game_canvas.create_image(i[0]-22, i[1]-22, image=self.cricle_blue if results[1] else self.cricle_red, anchor="nw")
 
     def handle_click(self, event: tk.Event):
-        if self.game_started and self.in_boundaries(event.x_root, event.y_root):
+        if self.game_started and self.in_boundaries(event.x_root, event.y_root) and not self.move_blocked:
             for idx, i in enumerate(self.cartesian):
                 if self.on_grid(event, i):
                     results = self.game.game_move(idx % self.n, int(idx/self.n))
+                    self.move_blocked = True
                     self.draw_chip(results)
+                    self.root.after(700, self.toggle_block)
                     if winner:=self.game.board.has_won():
-                        self.display_win(winner-1)
-                    if self.game.bot_game:
+                        self.root.after(1200, self.display_win, winner-1)
+                        # self.display_win(winner-1)
+                    elif self.game.bot_game:
                         self.root.after(600, self.draw_chip, self.game.game_move(0,0))
                         # self.draw_chip(self.game.game_move(0,0)) DEBUG: Without delay
                         
@@ -108,16 +124,24 @@ class GUI:
         
                         
     def draw_grid(self):
-        for i in range(1, self.m + 1):
-            x = (400/(self.m + 1)) * i  + 29
-            self.game_canvas.create_image(x, 36, image=self.stick_img, anchor="nw")
-            self.horizontal_coords.append(x)
-        for i in range(1, self.n + 1):
-            y = (400/(self.n + 1)) * i  + 29
-            self.game_canvas.create_image(36, y, image=self.stick_hori_img, anchor="nw")
-            self.vertical_coords.append(y)
+        self.draw_rows()
+        self.draw_cols()
         for i in it.product(self.vertical_coords, self.horizontal_coords):
             self.cartesian.append(i)
+            
+    def draw_cols(self):
+        for i in range(1, self.m + 1):
+            x = (400/(self.m + 1)) * i  + 29
+            self.game_canvas.create_image(x, 36, image=self.stick_img, anchor="nw", tags="col")
+            self.horizontal_coords.append(x)
+    def draw_rows(self):
+        for i in range(1, self.n + 1):
+            y = (400/(self.n + 1)) * i  + 29
+            self.game_canvas.create_image(36, y, image=self.stick_hori_img, anchor="nw", tags="row")
+            self.vertical_coords.append(y)
+            
+    def toggle_block(self):
+        self.move_blocked = not self.move_blocked
             
     def display_win(self, player):
         for widget in self.root.winfo_children():

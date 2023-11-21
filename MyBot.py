@@ -5,6 +5,7 @@ from Board import Board
 class Bot(Player):
     def __init__(self):
         super().__init__("KI", 2)
+        self.is_bot = True
 
     def make_move(self, board, m=None, n=None):
         empty_cells = []
