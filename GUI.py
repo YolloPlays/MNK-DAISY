@@ -5,7 +5,9 @@
 """
 
 import tkinter as tk
-import Board, Game, Player
+from Board import Board
+from Game import Game
+from Player import Player
 from PIL import Image,ImageTk
 import itertools as it
 import platform
@@ -67,7 +69,7 @@ class GUI:
         
     def init_game(self):
         self.game_started = True
-        self.game: Game = Game.Game(Board.Board(), Player.Player("Jannis", 1)) # DEBUG: Will later be replaced by buttons
+        self.game: Game = Game(Board(), Player("Jannis", 1)) # DEBUG: Will later be replaced by buttons
         self.m = self.game.board.m
         self.n = self.game.board.n
         self.game.gui = self
