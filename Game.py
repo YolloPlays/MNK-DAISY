@@ -17,13 +17,17 @@ class Game:
         current_player = self.player1 if current_player_turn else self.player2
         success = False
         chip_at=None
-        if self.board.array[n][m] == 0 or self.bot_game:
+        if self.board.array[n][m] == 0 or type(current_player) != Player.Player:
             chip_at = current_player.make_move(self.board, m, n)
             success = True
             self.playerturn = not self.playerturn
         # self.board.display() # DEBUG
         # self.gui.display_win(False) # DEBUG
         return (success, current_player_turn, chip_at) # <= needed for gui to know whos players turn it was True: player1, False: player 2
+    
+    def is_bot(self):
+        current_player = self.player1 if self.playerturn else self.player2
+        return type(current_player) != Player.Player
         
      
     def start(self):
