@@ -10,7 +10,7 @@ class Player():
         while True:
             n = (int(input(f"{self.name}, bitte geben Sie die Zeile an: ")) - 1) \
                 if n is None else n
-            m = (int(input(f"{self.name}, bitte geben Sie die Reihe an: ")) - 1) \
+            m = (int(input(f"{self.name}, bitte geben Sie die Spalte an: ")) - 1) \
                 if m is None else m
             if 0 <= m < board.m and 0 <= n < board.n:
                 if board.array[n][m] == 0: # <= Only necessary for raw input. GUI and Game handles this excption already
