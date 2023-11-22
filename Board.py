@@ -45,12 +45,23 @@ class Board:
         
         return win
 
+    def is_draw(self):
+        def is_full():
+            for row in range(self.n):
+                for col in range(self.m):
+                    if self.array[row][col] == 0:
+                        return False
+            return True
+        return is_full() and self.has_won() == 0
+
+
+            
 if __name__ == "__main__":
-    board = Board(3,8)
+    board = Board(2,2,2)
     player = 2
     board.array[0][0] = player
     board.array[1][0] = player
-    board.array[2][0] = player
-    board.array[3][0] = player
+    board.array[0][1] = player
+    board.array[1][1] = player
     board.display()
-    print(board.has_won())
+    print(board.is_draw())
