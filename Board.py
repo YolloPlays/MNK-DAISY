@@ -52,7 +52,7 @@ class Board:
                     if self.array[row][col] == 0:
                         return False
             return True
-        return is_full() and self.has_won() == 0
+        return self.has_won() == 0 and is_full()
 
 
             

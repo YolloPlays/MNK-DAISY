@@ -17,7 +17,7 @@ import platform
 class GUI:
     def __init__(self) -> None:
         paths = [r"images\LightBig.png", r"images\LightSmall.png", r"images\stick-hori.png", r"images\stick.png",
-                    r"images\circle_red.png", r"images\circle_blue.png", r"images\blue_won.png", r"images\red_won.png"]
+                    r"images\circle_red.png", r"images\circle_blue.png", r"images\blue_won.png", r"images\red_won.png", r"images\button_case.png"]
         if platform.system() == "Windows":
             import pyglet
             pyglet.options['win32_gdi_font'] = True # Necessary for tkinter quirk
@@ -52,13 +52,20 @@ class GUI:
         self.cricle_blue = tk.PhotoImage(file=paths[5])
         self.win_blue = tk.PhotoImage(file=paths[6])
         self.win_red = tk.PhotoImage(file=paths[7])
-        
-        self.start_button = tk.Button(self.root, bg="blue", command=self.init_game, text="Start")
-        self.start_button.pack(padx=100, pady=100, fill="both", expand=1)
-        # self.init_game() # Debug
+        self.button_case = tk.PhotoImage(file=paths[8])
 
         self.root.bind("<1>", self.handle_click)
         self.root.bind("<space>", self.delete_rows) #DEBUG
+        
+        #Move to start
+        self.game: Game = Game(Board(), Player("Jannis", 1)) # DEBUG: Will later be replaced by buttons
+        self.m = self.game.board.m
+        self.n = self.game.board.n
+        self.draw_game()
+        self.draw_grid()
+        self.game_started = True
+        self.game.gui = self
+        self.playersturn = True
 
         self.root.mainloop()
         
@@ -68,16 +75,7 @@ class GUI:
         self.game_canvas.delete("col")
         
     def init_game(self):
-        self.game_started = True
-        self.game: Game = Game(Board(), Player("Jannis", 1)) # DEBUG: Will later be replaced by buttons
-        self.m = self.game.board.m
-        self.n = self.game.board.n
-        self.game.gui = self
-        self.game.playermode = False
-        self.playersturn = True
         self.start_button.destroy()
-        self.draw_game()
-        self.draw_grid()
     
     def is_in_between(self, a,b,c):
         return b <= a <= c
