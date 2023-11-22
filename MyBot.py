@@ -21,6 +21,10 @@ class Bot(Player):
         n, m = choice(empty_cells)
         return super().make_move(board, m, n)
 
+
+
+
+
 if __name__ == "__main__":
 
     board = Board()
