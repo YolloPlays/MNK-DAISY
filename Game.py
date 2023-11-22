@@ -19,7 +19,7 @@ class Game:
         current_player = self.player1 if current_player_turn else self.player2
         success = False
         chip_at=None
-        if self.board.array[n][m] == 0 or type(current_player) != Player.Player:
+        if self.board.array[n][m] == 0 or type(current_player) != Player:
             chip_at = current_player.make_move(self.board, m, n)
             success = True
             self.playerturn = not self.playerturn
@@ -29,7 +29,7 @@ class Game:
     
     def is_bot(self):
         current_player = self.player1 if self.playerturn else self.player2
-        return type(current_player) != Player.Player
+        return type(current_player) != Player
         
      
     def start(self):
