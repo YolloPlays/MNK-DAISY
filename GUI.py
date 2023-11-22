@@ -67,7 +67,7 @@ class GUI:
         
     def init_game(self):
         self.game_started = True
-        self.game: Game = Game.Game(Board.Board(10,2), Player.Player("Jannis", 1)) # DEBUG: Will later be replaced by buttons
+        self.game: Game = Game.Game(Board.Board(), Player.Player("Jannis", 1)) # DEBUG: Will later be replaced by buttons
         self.m = self.game.board.m
         self.n = self.game.board.n
         self.game.gui = self
@@ -80,9 +80,6 @@ class GUI:
     def is_in_between(self, a,b,c):
         return b <= a <= c
     
-    def in_boundaries(self, x, y):
-        return self.is_in_between(x,self.game_canvas.winfo_rootx(), self.game_canvas.winfo_rootx() + self.game_canvas.winfo_width()) and self.is_in_between(y, self.game_canvas.winfo_rooty(), self.game_canvas.winfo_rooty() + self.game_canvas.winfo_height())
-    
     def on_grid(self, event: tk.Event, i: tuple):
         radius = 20
         return self.is_in_between(event.x, i[0]-7, i[0]+radius) and self.is_in_between(event.y, i[1]-7, i[1]+radius)
@@ -94,7 +91,7 @@ class GUI:
             self.game_canvas.create_image(i[0]-22, i[1]-22, image=self.cricle_blue if results[1] else self.cricle_red, anchor="nw")
 
     def handle_click(self, event: tk.Event):
-        if self.game_started and self.in_boundaries(event.x_root, event.y_root) and not self.move_blocked:
+        if self.game_started and event.widget == self.game_canvas and not self.move_blocked:
             for idx, i in enumerate(self.cartesian):
                 if self.on_grid(event, i):
                     results = self.game.game_move(m=idx % self.m, n=int(idx/self.m))
