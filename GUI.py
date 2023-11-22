@@ -67,7 +67,7 @@ class GUI:
         
     def init_game(self):
         self.game_started = True
-        self.game: Game = Game.Game(Board.Board(), Player.Player("Jannis", 1)) # DEBUG: Will later be replaced by buttons
+        self.game: Game = Game.Game(Board.Board(10,2), Player.Player("Jannis", 1)) # DEBUG: Will later be replaced by buttons
         self.m = self.game.board.m
         self.n = self.game.board.n
         self.game.gui = self
@@ -84,12 +84,12 @@ class GUI:
         return self.is_in_between(x,self.game_canvas.winfo_rootx(), self.game_canvas.winfo_rootx() + self.game_canvas.winfo_width()) and self.is_in_between(y, self.game_canvas.winfo_rooty(), self.game_canvas.winfo_rooty() + self.game_canvas.winfo_height())
     
     def on_grid(self, event: tk.Event, i: tuple):
-        radius =30
-        return self.is_in_between(event.x, i[0]-radius, i[0]+radius) and self.is_in_between(event.y, i[1]-radius, i[1]+radius)
+        radius = 20
+        return self.is_in_between(event.x, i[0]-7, i[0]+radius) and self.is_in_between(event.y, i[1]-7, i[1]+radius)
     
     def draw_chip(self, results):
         if results[0]:
-            n = (results[2][0])*5 + results[2][1]
+            n = (results[2][1])*self.m + results[2][0]
             i = self.cartesian[n]
             self.game_canvas.create_image(i[0]-22, i[1]-22, image=self.cricle_blue if results[1] else self.cricle_red, anchor="nw")
 
@@ -97,12 +97,12 @@ class GUI:
         if self.game_started and self.in_boundaries(event.x_root, event.y_root) and not self.move_blocked:
             for idx, i in enumerate(self.cartesian):
                 if self.on_grid(event, i):
-                    results = self.game.game_move(int(idx/self.n), idx % self.n)
+                    results = self.game.game_move(m=idx % self.m, n=int(idx/self.m))
                     self.move_blocked = True
                     self.draw_chip(results)
                     self.root.after(700, self.toggle_block)
                     if winner:=self.game.board.has_won():
-                        self.root.after(1200, self.display_win, winner-1)
+                        self.root.after(1200, self.display_win, winner-1) # winner-1 is basically is_red?
                         # self.display_win(winner-1)
                     elif self.game.is_bot():
                         self.root.after(600, self.draw_chip, self.game.game_move(0,0))
@@ -126,8 +126,11 @@ class GUI:
     def draw_grid(self):
         self.draw_rows()
         self.draw_cols()
-        for i in it.product(self.horizontal_coords, self.vertical_coords):
-            self.cartesian.append(i)
+        for y,x in it.product(self.vertical_coords, self.horizontal_coords):
+            self.cartesian.append((x,y))
+        # for i in self.cartesian: #DEBUG
+        #     self.game_canvas.create_rectangle(i[0]-7,i[1]-7,i[0]+20,i[1]+20)
+        # print(self.cartesian)
             
     def draw_cols(self):
         for i in range(1, self.m + 1):
