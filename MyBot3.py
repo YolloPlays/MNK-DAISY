@@ -24,15 +24,7 @@ class Bot(Player):
         # TODO add offense to Bot
         
         smaller_dimension = min(board.m, board.n)
-        radii_from_center = []
-        # Unterscheidung gerade/ ungerade m und n bzw. unterschiedlich
         
-        
-        #index_in_middle
-        
-        
-        for radius_from_center in range(smaller_dimension):
-            radius_from_center.append(radii_from_center)
         
         
         
@@ -100,17 +92,31 @@ class Bot(Player):
         return points_in_row_1
 
 
-    def calculate_next_row(points: list):
-        
+    def calculate_next_row(self, points: list):
+        next_row = []
         for point in points:
-            next_row = [(),(),(),(), (), (), (), ()]
+            next_row_point = [(point[0]-1, point[1]),(point[0]-1, point[1]+1),(point[0], point[1]+1),(point[0]+1, point[1]+1), (point[0]+1, point[1]), (point[0]+1, point[1]-1), (point[0], point[1]-1), (point[0]-1, point[1]-1)] # Abfolge: oben, oben rechts, rechts, unten rechts
+            next_row.extend(next_row_point)
+        next_row = set(next_row)
         return next_row
-            
+
+    def calculate_number_of_circles(self, board):
+        if board.m % 2 == 0 and board.n % 2 == 0:
+            number_of_circles = min(board.m, board.n) # aufrunden
+    
+    
+    
+    def list_of_rows(self):
+        center = self.find_center_points(board)
+        
+        pass
 
 if __name__ == "__main__":
 
-    board = Board(6,5)
+    board = Board(6,8)
     bot = Bot()
-    print(bot.find_center_points(board))
+    middle = bot.find_center_points(board)
+    print(middle)
+    #print(bot.calculate_next_row(middle))
     
     
