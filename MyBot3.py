@@ -6,7 +6,6 @@ from MyBot import Bot
 class Bot(Player):
     def __init__(self):
         super().__init__("KI", 2)
-        self.is_bot = True
 
     def make_move(self, board, m=None, n=None):
         # Check on board if human player has 2 or more in a row, col oder diag
@@ -92,17 +91,36 @@ class Bot(Player):
         return points_in_row_1
 
 
-    def calculate_next_row(self, points: list):
-        next_row = []
-        for point in points:
-            next_row_point = [(point[0]-1, point[1]),(point[0]-1, point[1]+1),(point[0], point[1]+1),(point[0]+1, point[1]+1), (point[0]+1, point[1]), (point[0]+1, point[1]-1), (point[0], point[1]-1), (point[0]-1, point[1]-1)] # Abfolge: oben, oben rechts, rechts, unten rechts
-            next_row.extend(next_row_point)
-        next_row = set(next_row)
-        return next_row
+    def find_outer_perimeter(self, board: Board):
+        points_in_perimeter = []
+        for col in range(board.m):
+            if col == 0 or col == board.m-1:
+                for row in range(board.n):
+                    points_in_perimeter.append((row, col))
+            elif col > 0 and col < board.m-1:
+                for row in range(0,board.n,board.n-1):
+                    points_in_perimeter.append((row, col))
+        
+        return points_in_perimeter
 
-    def calculate_number_of_circles(self, board):
-        if board.m % 2 == 0 and board.n % 2 == 0:
-            number_of_circles = min(board.m, board.n) # aufrunden
+    def calculate_next_row(self, perimeter_points : list):
+        
+        
+        for point in perimeter_points:
+            if point[1] == 0:
+                
+    
+    
+    
+    
+    
+    # def calculate_next_row(self, points: list):
+    #     next_row = []
+    #     for point in points:
+    #         next_row_point = [(point[0]-1, point[1]),(point[0]-1, point[1]+1),(point[0], point[1]+1),(point[0]+1, point[1]+1), (point[0]+1, point[1]), (point[0]+1, point[1]-1), (point[0], point[1]-1), (point[0]-1, point[1]-1)] # Abfolge: oben, oben rechts, rechts, unten rechts
+    #         next_row.extend(next_row_point)
+    #     next_row = set(next_row)
+    #     return next_row
     
     
     
@@ -113,10 +131,10 @@ class Bot(Player):
 
 if __name__ == "__main__":
 
-    board = Board(6,8)
+    board = Board(3,3)
     bot = Bot()
-    middle = bot.find_center_points(board)
-    print(middle)
-    #print(bot.calculate_next_row(middle))
+    #middle = bot.find_center_points(board)
+    #print(middle)
+    print(bot.find_outer_perimeter(board))
     
     

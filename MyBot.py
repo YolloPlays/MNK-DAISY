@@ -5,7 +5,6 @@ from Board import Board
 class Bot(Player):
     def __init__(self):
         super().__init__("KI", 2)
-        self.is_bot = True
 
     def make_move(self, board, m=None, n=None):
         """_summary_
@@ -21,6 +20,10 @@ class Bot(Player):
         # Randomly select a cell to place the disc
         n, m = choice(empty_cells)
         return super().make_move(board, m, n)
+
+
+
+
 
 if __name__ == "__main__":
 
