@@ -1,7 +1,7 @@
-import GUI, Board, Player, MyBot
+import GUI, Board, Player, MyBot, MyBot2
 
 class Game:
-    def __init__(self, board:Board, player1:Player, player2 :Player  = MyBot.Bot()) -> None:
+    def __init__(self, board:Board, player1:Player, player2 :Player  = MyBot2.Bot()) -> None:
         self.board = board
         self.player1 = player1
         self.player2 = player2

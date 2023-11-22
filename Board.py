@@ -46,11 +46,11 @@ class Board:
         return win
 
 if __name__ == "__main__":
-    board = Board()
-    board.display()
+    board = Board(3,8)
     player = 2
     board.array[0][0] = player
     board.array[1][0] = player
     board.array[2][0] = player
     board.array[3][0] = player
+    board.display()
     print(board.has_won())
