@@ -5,7 +5,6 @@ from Board import Board
 class Bot(Player):
     def __init__(self):
         super().__init__("KI", 2)
-        self.is_bot = True
 
     def make_move(self, board, m=None, n=None):
         # Check on board if human player has 2 or more in a row, col oder diag
