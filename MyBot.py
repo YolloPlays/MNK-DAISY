@@ -99,7 +99,7 @@ class Bot2(Player):
         # Check on board if human player has 2 or more in a row, col oder diag
         # Check empty cells on board
         empty_cells = self.find_empty_cells(board)
-        empty_cells_higher_prob = self.empty_cells_to_pick(empty_cells, board)
+        empty_cells_higher_prob = self.cells_increase_probability(empty_cells, board)
         check_for = 2
         
         
@@ -169,7 +169,7 @@ class Bot2(Player):
         return empty_cells
     
     
-    def empty_cells_to_pick(self, cells, board):
+    def cells_increase_probability(self, cells, board):
         """function that takes all the free cells on the board and appends them min(row+1/col+1) times to the list.
         This inceases the probability of the Bot placing a ring in the center of the field.
 
