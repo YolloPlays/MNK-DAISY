@@ -5,7 +5,11 @@ class Board:
         self.m = m
         self.n = n
         self.k = k
-        self.array = np.zeros((self.n, self.m))
+        self.array = self.make_array(self.m, self.n)
+
+    @classmethod
+    def make_array(self, m, n, k=None):
+        return  np.zeros((n, m))
     
     def display(self):
         print(self.array)

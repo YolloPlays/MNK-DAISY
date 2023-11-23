@@ -1,13 +1,14 @@
 from Board import Board
 from Player import Player
 from MyBot import *
+from MyBot2 import *
 
 class Game:
     def __init__(self, board:Board, player1:Player, player2 :Player  = Bot()) -> None:
         self.board = board
         self.player1 = player1
         self.player2 = player2
-        self.bot_game = player2.is_bot
+        self.bot_game = type(player2) != Player
         self.playerturn = True
         self.gui = None
         self.game_started = False
@@ -49,5 +50,5 @@ class Game:
         
         
 if __name__ == "__main__":
-    game = Game(Board.Board(), Player.Player("Klaus", 1))
+    game = Game(Board(), Player("Klaus", 1))
     game.start()

@@ -5,6 +5,7 @@
 """
 
 import tkinter as tk
+from tkinter import ttk
 from Board import Board
 from Game import Game
 from Player import Player
@@ -34,7 +35,7 @@ class GUI:
         self.root = tk.Tk()
         self.root.title("MNK")
         self.root.configure(bg="#434343")
-        self.root.geometry("1000x600")
+        self.root.geometry("1000x650")
 
         self.game_frame = tk.Frame(self.root, bg="#434343")
         self.game_frame.pack(padx=64, pady=64, side="left", fill="both")
@@ -43,6 +44,9 @@ class GUI:
 
         self.stats_frame = tk.Frame(self.root, bg="#434343")
         self.stats_frame.pack(padx=20, pady=64, side="right", fill="both")
+        
+        self.slider_frame = tk.Frame(self.stats_frame, bg="#434343")
+        self.slider_frame.pack(padx=20, pady=64, side="top", fill="x")
 
         self.stats_img = tk.PhotoImage(file=paths[1])
         
@@ -55,27 +59,41 @@ class GUI:
         self.button_case = tk.PhotoImage(file=paths[8])
 
         self.root.bind("<1>", self.handle_click)
-        self.root.bind("<space>", self.delete_rows) #DEBUG
+        
+        self.img_slider = tk.PhotoImage(file=r"images\slider.png")
+        self.img_slider_active = tk.PhotoImage(file=r"images\slider_active.png")
+        self.trough = tk.PhotoImage(file=r"images\thru.png")
+        self.style = ttk.Style(self.stats_frame)
+        self.style.element_create('custom.Scale.trough', 'image', self.trough)
+        self.style.element_create('custom.Horizontal.Scale.slider', 'image', self.img_slider,
+                     ('active', self.img_slider_active))
+        self.style.layout('custom.Horizontal.TScale', [('custom.Scale.trough', {'sticky': 'we'}),
+             ('Horizontal.Scale.trough',
+               {'sticky': 'nswe',
+                'children': [('custom.Horizontal.Scale.slider',
+                              {'side': 'left', 'sticky': ''})]})])
+        self.style.configure('custom.Horizontal.TScale', background="#434343")
         
         #Move to start
-        self.game: Game = Game(Board(), Player("Jannis", 1)) # DEBUG: Will later be replaced by buttons
+        self.game: Game = Game(Board(), Player("Jannis", 1), Player("John",2)) # DEBUG: Will later be replaced by buttons
         self.m = self.game.board.m
         self.n = self.game.board.n
+        self.k = self.game.board.k
+        self.root.bind("<space>", self.debug) #DEBUG
+        self.draw_slider()
         self.draw_game()
         self.draw_grid()
-        self.game_started = True
         self.game.gui = self
         self.playersturn = True
 
         self.root.mainloop()
         
-    def delete_rows(self, event): #DEBUG
+    def delete_rows(self, event=None): #DEBUG
         self.game_canvas.delete("row")
-    def delete_cols(self, event):
+        self.vertical_coords = []
+    def delete_cols(self, event=None):
         self.game_canvas.delete("col")
-        
-    def init_game(self):
-        self.start_button.destroy()
+        self.horizontal_coords=[]
     
     def is_in_between(self, a,b,c):
         return b <= a <= c
@@ -104,20 +122,95 @@ class GUI:
                     elif self.game.is_bot():
                         self.root.after(600, self.draw_chip, self.game.game_move(0,0))
                         # self.draw_chip(self.game.game_move(0,0)) DEBUG: Without delay
-                        
+    
+        
+    def scale_change_m(self, valstr):
+        self.delete_cols()
+        val = int(float(valstr))
+        val_label = str(val)
+        self.m = val
+        self.slider_label_m.configure(text=val)
+        max_k = self.m if self.m > self.n else self.n
+        self.k_slide.configure(to=max_k)
+        if max_k < self.k_slide.get():
+            self.k_slide.set(max_k)
+            self.slider_label_k.configure(text=int(max_k))
+        self.draw_cols()
+    
+    def scale_change_n(self, valstr):
+        self.delete_rows()
+        val = int(float(valstr))
+        self.n = val
+        self.slider_label_n.configure(text=val)
+        max_k = self.m if self.m > self.n else self.n
+        self.k_slide.configure(to=max_k)
+        if max_k < self.k_slide.get():
+            self.k = max_k
+            self.k_slide.set(max_k)
+            self.slider_label_k.configure(text=int(max_k))
+        self.draw_rows()
+        
+    def scale_change_k(self, valstr):
+        val = int(float(valstr))
+        self.k = val
+        self.slider_label_k.configure(text=val)
+        
+
+        
+    def press_play(self):
+        self.slider_frame.destroy()
+        self.play_button.destroy()
+        self.cartesian = []
+        for y,x in it.product(self.vertical_coords, self.horizontal_coords):
+            self.cartesian.append((x,y))
+        self.game_started = True
+        self.stats_canvas.create_rectangle(35, 35, 311, 190, fill="#393939")
+        self.stats_canvas.create_rectangle(35, 208, 311, 363, fill="#393939")
+        self.stats_canvas.create_image(0, 0, image=self.stats_img, anchor="nw")
+        self.game.board.array = Board.make_array(self.m, self.n)
+        self.game.board.k = self.k
+        self.game.board.n = self.n
+        self.game.board.m = self.m
+        
                         
     def draw_game(self):
         self.game_canvas = tk.Canvas(self.game_frame, width=472, height=472, bg="#434343", highlightthickness=0)
         self.game_canvas.pack()
         self.game_canvas.create_rectangle(35, 35, 436, 436, fill="#393939")
         self.game_canvas.create_image(0, 0, image=self.game_img, anchor="nw")
+        self.play_button = tk.Button(self.game_frame, bg="blue", text="start", command=self.press_play)
+        self.play_button.pack(side="bottom")
         
         self.stats_canvas = tk.Canvas(self.stats_frame, width=347, height=399, bg="#434343", highlightthickness=0)
         self.stats_canvas.pack()
-        self.stats_canvas.create_rectangle(35, 35, 311, 190, fill="#393939")
-        self.stats_canvas.create_rectangle(35, 208, 311, 363, fill="#393939")
-        self.stats_canvas.create_image(0, 0, image=self.stats_img, anchor="nw")
+        self.m_slide = ttk.Scale(self.slider_frame, from_=2, to=10, orient=tk.HORIZONTAL, style="custom.Horizontal.TScale", length=200, value=5, command=self.scale_change_m)
+        self.n_slide = ttk.Scale(self.slider_frame, from_=2, to=10, orient=tk.HORIZONTAL, style="custom.Horizontal.TScale", length=200, value=5, command=self.scale_change_n)
+        self.k_slide = ttk.Scale(self.slider_frame, from_=2, to=5, orient=tk.HORIZONTAL, style="custom.Horizontal.TScale", length=200, value=4, command=self.scale_change_k)
+        self.m_slide.pack()
+        self.n_slide.pack()
+        self.k_slide.pack()
+        # self.stats_canvas.create_rectangle(35, 35, 311, 190, fill="#393939")
+        # self.stats_canvas.create_rectangle(35, 208, 311, 363, fill="#393939")
+        # self.stats_canvas.create_image(0, 0, image=self.stats_img, anchor="nw")
         
+    def draw_slider(self):
+        self.slider_label_frame = tk.Frame(self.slider_frame, bg="#434343")
+        self.slider_label_frame.pack(side="right", fill="x")
+        self.sname_label_frame = tk.Frame(self.slider_frame, bg="#434343")
+        self.sname_label_frame.pack(side="left", fill="x")
+        PADY = 5
+        self.slider_label_m = tk.Label(self.slider_label_frame, text=5, font=("TR2N",22), bg="#434343",fg="white")
+        self.slider_label_m.pack(side="top",pady=PADY)
+        self.slider_label_n = tk.Label(self.slider_label_frame, text=5, font=("TR2N",22), bg="#434343", fg="white")
+        self.slider_label_n.pack(side="top",pady=PADY)
+        self.slider_label_k = tk.Label(self.slider_label_frame, text=4, font=("TR2N",22), bg="#434343", fg="white")
+        self.slider_label_k.pack(side="top",pady=PADY)
+        self.sname_label_m = tk.Label(self.sname_label_frame, text="m", font=("TR2N",22), bg="#434343", fg="white")
+        self.sname_label_m.pack(side="top",pady=PADY)
+        self.sname_label_n = tk.Label(self.sname_label_frame, text="n", font=("TR2N",22), bg="#434343", fg="white")
+        self.sname_label_n.pack(side="top",pady=PADY)
+        self.sname_label_k = tk.Label(self.sname_label_frame, text="k", font=("TR2N",22), bg="#434343", fg="white")
+        self.sname_label_k.pack(side="top",pady=PADY)
         
                         
     def draw_grid(self):
@@ -151,6 +244,10 @@ class GUI:
         winner_img, winner_txt = (self.win_blue, self.game.player1.name) if not player else (self.win_red, self.game.player2.name)
         winner_canvas.create_image(0, 0, image=winner_img, anchor="nw")
         winner_canvas.create_text(263, 295, font=("TR2N",62), text=winner_txt, fill="white")
+        
+    def debug(self, event):
+        print(f"GUI: m: {self.m} n: {self.n} k: {self.k}")
+        print(f"Board: m: {self.game.board.m} n: {self.game.board.n} k: {self.game.board.k}")
         
         
         
