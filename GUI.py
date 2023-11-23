@@ -35,7 +35,7 @@ class GUI:
         self.root = tk.Tk()
         self.root.title("MNK")
         self.root.configure(bg="#434343")
-        self.root.geometry("1000x650")
+        self.root.geometry("1000x700")
 
         self.game_frame = tk.Frame(self.root, bg="#434343")
         self.game_frame.pack(padx=64, pady=64, side="left", fill="both")
@@ -57,6 +57,7 @@ class GUI:
         self.win_blue = tk.PhotoImage(file=paths[6])
         self.win_red = tk.PhotoImage(file=paths[7])
         self.button_case = tk.PhotoImage(file=paths[8])
+        
 
         self.root.bind("<1>", self.handle_click)
         
@@ -68,12 +69,13 @@ class GUI:
         self.style.element_create('custom.Horizontal.Scale.slider', 'image', self.img_slider,
                      ('active', self.img_slider_active))
         self.style.layout('custom.Horizontal.TScale', [('custom.Scale.trough', {'sticky': 'we'}),
-             ('Horizontal.Scale.trough',
+            ('Horizontal.Scale.trough',
                {'sticky': 'nswe',
                 'children': [('custom.Horizontal.Scale.slider',
                               {'side': 'left', 'sticky': ''})]})])
         self.style.configure('custom.Horizontal.TScale', background="#434343")
-        
+        self.style.map("custom.TButton", image=[self.button_case, ('active', self.button_case_active)])
+                
         #Move to start
         self.game: Game = Game(Board(), Player("Jannis", 1), Player("John",2)) # DEBUG: Will later be replaced by buttons
         self.m = self.game.board.m
@@ -178,7 +180,7 @@ class GUI:
         self.game_canvas.pack()
         self.game_canvas.create_rectangle(35, 35, 436, 436, fill="#393939")
         self.game_canvas.create_image(0, 0, image=self.game_img, anchor="nw")
-        self.play_button = tk.Button(self.game_frame, bg="blue", text="start", command=self.press_play)
+        self.play_button = tk.Button(self.game_frame, image=self.button_case, bg="#434343", command=self.press_play, foreground="white", borderwidth=0)
         self.play_button.pack(side="bottom")
         
         self.stats_canvas = tk.Canvas(self.stats_frame, width=347, height=399, bg="#434343", highlightthickness=0)
