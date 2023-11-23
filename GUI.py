@@ -8,6 +8,7 @@ import tkinter as tk
 from tkinter import ttk
 from Board import Board
 from Game import Game
+from MyBot import *
 from Player import Player
 from PIL import Image,ImageTk
 import itertools as it
@@ -17,15 +18,16 @@ import platform
 
 class GUI:
     def __init__(self) -> None:
-        paths = [r"images\LightBig.png", r"images\LightSmall.png", r"images\stick-hori.png", r"images\stick.png",
-                    r"images\circle_red.png", r"images\circle_blue.png", r"images\blue_won.png", r"images\red_won.png", r"images\button_case.png"]
+        self.paths = [r"images\LightBig.png", r"images\LightSmall.png", r"images\stick-hori.png", r"images\stick.png",
+                    r"images\circle_red.png", r"images\circle_blue.png", r"images\blue_won.png", r"images\red_won.png", r"images\button_case.png",
+                    r"images\button_case_active.png", r"images\slider.png", r"images\slider_active.png", r"images\thru.png"]
         if platform.system() == "Windows":
             import pyglet
             pyglet.options['win32_gdi_font'] = True # Necessary for tkinter quirk
             pyglet.font.add_file(r'font\Tr2n.ttf')
         else:
-            for idx, path in enumerate(paths):
-                paths[idx] = path.replace("\\", "/")
+            for idx, path in enumerate(self.paths):
+                self.paths[idx] = path.replace("\\", "/")
             
         self.game_started = False
         self.move_blocked = False
@@ -40,30 +42,35 @@ class GUI:
         self.game_frame = tk.Frame(self.root, bg="#434343")
         self.game_frame.pack(padx=64, pady=64, side="left", fill="both")
 
-        self.game_img = tk.PhotoImage(file=paths[0])
+        self.game_img = tk.PhotoImage(file=self.paths[0])
 
         self.stats_frame = tk.Frame(self.root, bg="#434343")
         self.stats_frame.pack(padx=20, pady=64, side="right", fill="both")
         
         self.slider_frame = tk.Frame(self.stats_frame, bg="#434343")
-        self.slider_frame.pack(padx=20, pady=64, side="top", fill="x")
-
-        self.stats_img = tk.PhotoImage(file=paths[1])
+        self.slider_frame.pack(padx=20, pady=10, side="top", fill="x")
+        self.place_holder1 = tk.Canvas(self.slider_frame, width=1, height=20, bg="#434343", highlightthickness=0)
+        self.place_holder1.pack()
+        self.selection_frame = tk.Frame(self.stats_frame, bg="#434343")
+        self.selection_frame.pack(side="top", fill="x")
         
-        self.stick_hori_img = tk.PhotoImage(file=paths[2])
-        self.stick_img = tk.PhotoImage(file=paths[3])
-        self.cricle_red = tk.PhotoImage(file=paths[4])
-        self.cricle_blue = tk.PhotoImage(file=paths[5])
-        self.win_blue = tk.PhotoImage(file=paths[6])
-        self.win_red = tk.PhotoImage(file=paths[7])
-        self.button_case = tk.PhotoImage(file=paths[8])
+        self.stats_img = tk.PhotoImage(file=self.paths[1])
+        
+        self.stick_hori_img = tk.PhotoImage(file=self.paths[2])
+        self.stick_img = tk.PhotoImage(file=self.paths[3])
+        self.cricle_red = tk.PhotoImage(file=self.paths[4])
+        self.cricle_blue = tk.PhotoImage(file=self.paths[5])
+        self.win_blue = tk.PhotoImage(file=self.paths[6])
+        self.win_red = tk.PhotoImage(file=self.paths[7])
+        self.button_case = tk.PhotoImage(file=self.paths[8])
+        self.button_case_active = tk.PhotoImage(file=self.paths[9])
         
 
         self.root.bind("<1>", self.handle_click)
         
-        self.img_slider = tk.PhotoImage(file=r"images\slider.png")
-        self.img_slider_active = tk.PhotoImage(file=r"images\slider_active.png")
-        self.trough = tk.PhotoImage(file=r"images\thru.png")
+        self.img_slider = tk.PhotoImage(file=self.paths[10])
+        self.img_slider_active = tk.PhotoImage(file=self.paths[11])
+        self.trough = tk.PhotoImage(file=self.paths[12])
         self.style = ttk.Style(self.stats_frame)
         self.style.element_create('custom.Scale.trough', 'image', self.trough)
         self.style.element_create('custom.Horizontal.Scale.slider', 'image', self.img_slider,
@@ -74,7 +81,6 @@ class GUI:
                 'children': [('custom.Horizontal.Scale.slider',
                               {'side': 'left', 'sticky': ''})]})])
         self.style.configure('custom.Horizontal.TScale', background="#434343")
-        self.style.map("custom.TButton", image=[self.button_case, ('active', self.button_case_active)])
                 
         #Move to start
         self.game: Game = Game(Board(), Player("Jannis", 1), Player("John",2)) # DEBUG: Will later be replaced by buttons
@@ -85,6 +91,7 @@ class GUI:
         self.draw_slider()
         self.draw_game()
         self.draw_grid()
+        self.draw_gamemode_buttons()
         self.game.gui = self
         self.playersturn = True
 
@@ -174,26 +181,41 @@ class GUI:
         self.game.board.n = self.n
         self.game.board.m = self.m
         
+    def create_button(self, frame, command, bg, image, name):
+        temp_btn = tk.Button(frame, command=command, bg=bg, bd=0, image=image, name=name)
+        temp_btn.bind('<Enter>', self.on_enter)
+        temp_btn.bind('<Leave>', self.on_leave)
+        return temp_btn
+    
+    def draw_gamemode_buttons(self):
+        def create_gmbtn(name):
+            return self.create_button(self.selection_frame, command=self.change_gamemode, bg="#393939", image=self.button_case, name=name)
+            
+        self.bot_btn = create_gmbtn("bot")
+        self.bot_btn.place(x=50,y=50)
+        self.bot1_btn = create_gmbtn("bot1")
+        self.bot2_btn = create_gmbtn("bot2")
+        
                         
     def draw_game(self):
         self.game_canvas = tk.Canvas(self.game_frame, width=472, height=472, bg="#434343", highlightthickness=0)
         self.game_canvas.pack()
         self.game_canvas.create_rectangle(35, 35, 436, 436, fill="#393939")
         self.game_canvas.create_image(0, 0, image=self.game_img, anchor="nw")
-        self.play_button = tk.Button(self.game_frame, image=self.button_case, bg="#434343", command=self.press_play, foreground="white", borderwidth=0)
-        self.play_button.pack(side="bottom")
+        self.play_button = self.create_button(self.game_frame, command=self.press_play, bg="#434343", image=self.button_case, name="play")
+        self.play_button.pack(side="top")
         
-        self.stats_canvas = tk.Canvas(self.stats_frame, width=347, height=399, bg="#434343", highlightthickness=0)
-        self.stats_canvas.pack()
+        self.stats_canvas = tk.Canvas(self.selection_frame, width=347, height=399, bg="#434343", highlightthickness=0)
+        self.stats_canvas.pack(side="top")
         self.m_slide = ttk.Scale(self.slider_frame, from_=2, to=10, orient=tk.HORIZONTAL, style="custom.Horizontal.TScale", length=200, value=5, command=self.scale_change_m)
         self.n_slide = ttk.Scale(self.slider_frame, from_=2, to=10, orient=tk.HORIZONTAL, style="custom.Horizontal.TScale", length=200, value=5, command=self.scale_change_n)
         self.k_slide = ttk.Scale(self.slider_frame, from_=2, to=5, orient=tk.HORIZONTAL, style="custom.Horizontal.TScale", length=200, value=4, command=self.scale_change_k)
         self.m_slide.pack()
         self.n_slide.pack()
         self.k_slide.pack()
-        # self.stats_canvas.create_rectangle(35, 35, 311, 190, fill="#393939")
-        # self.stats_canvas.create_rectangle(35, 208, 311, 363, fill="#393939")
-        # self.stats_canvas.create_image(0, 0, image=self.stats_img, anchor="nw")
+        self.stats_canvas.create_rectangle(35, 35, 311, 190, fill="#393939")
+        self.stats_canvas.create_rectangle(35, 208, 311, 363, fill="#393939")
+        self.stats_canvas.create_image(0, 0, image=self.stats_img, anchor="nw")
         
     def draw_slider(self):
         self.slider_label_frame = tk.Frame(self.slider_frame, bg="#434343")
@@ -214,6 +236,15 @@ class GUI:
         self.sname_label_k = tk.Label(self.sname_label_frame, text="k", font=("TR2N",22), bg="#434343", fg="white")
         self.sname_label_k.pack(side="top",pady=PADY)
         
+    def on_leave(self, event):
+        event.widget.config(image=self.button_case)
+    def on_enter(self, event: tk.Event):
+        event.widget.config(image=self.button_case_active)
+        
+    def change_gamemode(self,event: tk.Event): #PROOF OF CONCEPT
+        modes = {"bot": Bot(), "bot1": Bot1(), "bot2": Bot2()}
+        self.player1 = modes[event.widget._name]
+        pass
                         
     def draw_grid(self):
         self.draw_rows()
@@ -250,7 +281,6 @@ class GUI:
     def debug(self, event):
         print(f"GUI: m: {self.m} n: {self.n} k: {self.k}")
         print(f"Board: m: {self.game.board.m} n: {self.game.board.n} k: {self.game.board.k}")
-        
         
         
 if __name__ == "__main__":
