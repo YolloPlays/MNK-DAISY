@@ -19,7 +19,7 @@ class Bot(Player):
         empty_cells = []
         for col in range(board.m):
             for row in range(board.n):
-                empty_cells.append((row,col)) if board.array[row][col] == 0 else None
+                empty_cells.append((row,col)) if board.array[row, col] == 0 else None
         
         # Randomly select a cell to place the disc
         n, m = choice(empty_cells)
@@ -41,7 +41,7 @@ class Bot1(Player):
         empty_cells = []
         for col in range(board.m):
             for row in range(board.n):
-                empty_cells.append((row,col)) if board.array[row][col] == 0 else None
+                empty_cells.append((row,col)) if board.array[row, col] == 0 else None
 
         
         check_for = 2
@@ -50,7 +50,7 @@ class Bot1(Player):
         # Check horizontal for 2 in a row
         for row in range(board.n):
             for col in range(board.m - check_for+1):
-                if all(board.array[row][col + i] == board.array[row][col] and board.array[row][col] == 1 for i in range(1, check_for)):
+                if all(board.array[row, col + i] == board.array[row, col] and board.array[row, col] == 1 for i in range(1, check_for)):
                     cells_to_set.append((row, col-1)) if (row, col-1) in empty_cells else None
                     cells_to_set.append((row, col+board.k-check_for)) if (row, col+board.k-check_for) in empty_cells else None
         
@@ -58,7 +58,7 @@ class Bot1(Player):
         # Check vertical for 2 in a row
         for col in range(board.m):
             for row in range(board.n - check_for + 1):
-                if all(board.array[row + i][col] == board.array[row][col] and board.array[row][col] == 1 for i in range(1, check_for)):
+                if all(board.array[row + i, col] == board.array[row, col] and board.array[row, col] == 1 for i in range(1, check_for)):
                     cells_to_set.append((row-1, col)) if (row-1, col) in empty_cells else None
                     cells_to_set.append((row+board.k-check_for, col)) if (row+board.k-check_for, col) in empty_cells else None
         
@@ -66,14 +66,14 @@ class Bot1(Player):
         # # Check diagonal for 2 in a row
         for row in range(board.n - check_for + 1):
             for col in range(board.m - check_for + 1):
-                if all(board.array[row + i][col + i] == board.array[row][col] and board.array[row][col] == 1 for i in range(1, check_for)):
+                if all(board.array[row + i, col + i] == board.array[row, col] and board.array[row, col] == 1 for i in range(1, check_for)):
                     cells_to_set.append((row-1, col-1)) if (row-1, col-1) in empty_cells else None
                     cells_to_set.append((row+board.k-check_for, col+board.k-check_for)) if (row+board.k-check_for, col+board.k-check_for) in empty_cells else None
         
 
         for row in range(board.n - check_for + 1):
             for col in range(check_for - 1, board.m):
-                if all(board.array[row + i][col - i] == board.array[row][col] and board.array[row][col] == 1 for i in range(1, check_for)):
+                if all(board.array[row + i, col - i] == board.array[row, col] and board.array[row, col] == 1 for i in range(1, check_for)):
                     cells_to_set.append((row-1, col+1)) if (row-1, col+1) in empty_cells else None
                     cells_to_set.append((row+board.k-check_for, col-board.k+check_for)) if (row+board.k-check_for, col-board.k+check_for) in empty_cells else None
         
@@ -107,7 +107,7 @@ class Bot2(Player):
         # Check horizontal for 2 in a row
         for row in range(board.n):
             for col in range(board.m - check_for+1):
-                if all(board.array[row][col + i] == board.array[row][col] and board.array[row][col] == 1 for i in range(1, check_for)):
+                if all(board.array[row, col + i] == board.array[row, col] and board.array[row, col] == 1 for i in range(1, check_for)):
                     cells_to_set.append((row, col-1)) if (row, col-1) in empty_cells else None
                     cells_to_set.append((row, col+board.k-check_for)) if (row, col+board.k-check_for) in empty_cells else None
         
@@ -115,7 +115,7 @@ class Bot2(Player):
         # Check vertical for 2 in a row
         for col in range(board.m):
             for row in range(board.n - check_for + 1):
-                if all(board.array[row + i][col] == board.array[row][col] and board.array[row][col] == 1 for i in range(1, check_for)):
+                if all(board.array[row + i, col] == board.array[row, col] and board.array[row, col] == 1 for i in range(1, check_for)):
                     cells_to_set.append((row-1, col)) if (row-1, col) in empty_cells else None
                     cells_to_set.append((row+board.k-check_for, col)) if (row+board.k-check_for, col) in empty_cells else None
         
@@ -123,14 +123,14 @@ class Bot2(Player):
         # Check diagonal for 2 in a row (left to right)
         for row in range(board.n - check_for + 1):
             for col in range(board.m - check_for + 1):
-                if all(board.array[row + i][col + i] == board.array[row][col] and board.array[row][col] == 1 for i in range(1, check_for)):
+                if all(board.array[row + i, col + i] == board.array[row, col] and board.array[row, col] == 1 for i in range(1, check_for)):
                     cells_to_set.append((row-1, col-1)) if (row-1, col-1) in empty_cells else None
                     cells_to_set.append((row+board.k-check_for, col+board.k-check_for)) if (row+board.k-check_for, col+board.k-check_for) in empty_cells else None
         
         # Check diagonal for 2 in a row (right to left)
         for row in range(board.n - check_for + 1):
             for col in range(check_for - 1, board.m):
-                if all(board.array[row + i][col - i] == board.array[row][col] and board.array[row][col] == 1 for i in range(1, check_for)):
+                if all(board.array[row + i, col - i] == board.array[row, col] and board.array[row, col] == 1 for i in range(1, check_for)):
                     cells_to_set.append((row-1, col+1)) if (row-1, col+1) in empty_cells else None
                     cells_to_set.append((row+board.k-check_for, col-board.k+check_for)) if (row+board.k-check_for, col-board.k+check_for) in empty_cells else None
         
@@ -165,7 +165,7 @@ class Bot2(Player):
         empty_cells = []
         for col in range(board.m):
                 for row in range(board.n):
-                    empty_cells.append((row,col)) if board.array[row][col] == 0 else None
+                    empty_cells.append((row,col)) if board.array[row, col] == 0 else None
         return empty_cells
     
     
@@ -202,8 +202,8 @@ class Bot2(Player):
 if __name__ == "__main__":
 
     board = Board(6,6)
-    board.array[2][2] = 1
-    board.array[1][1] = 1
+    board.array[2, 2] = 1
+    board.array[1, 1] = 1
     bot = Bot2()
     bot.make_move(board)
     board.display()
