@@ -10,7 +10,7 @@ class Game:
         self.player2 = player2
         self.bot_game = type(player2) != Player
         self.playerturn = True
-        self.gui = None
+        self.gui = False
         self.game_started = False
     
     def game_move(self, m, n):
@@ -35,7 +35,7 @@ class Game:
      
     def start(self):
         self.game_started = True
-        if self.gui == None: # <= Backwards compatibility for raw input
+        if not self.gui: # <= Backwards compatibility for raw input
             self.game_loop()
         
     def game_loop(self):
