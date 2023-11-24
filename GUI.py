@@ -201,7 +201,11 @@ class GUI:
             tmp_btn = create_gmbtn(f"{(i//self.BUTTON_COUNT)+1}-{i%self.BUTTON_COUNT}")
             tmp_btn.place(x=OFFSET+((i%3)*(BTN_SIZE+PADDING)),y=OFFSET+(i//3)*BTN_SIZE+((i//self.BUTTON_COUNT)*32))
             tmp_btn.bind("<1>", self.change_gamemode)
-            if i==5 or i == 11:
+            if i==5:
+                self.button_toggle1 = tmp_btn
+                tmp_btn.configure(image=self.images[14])
+            elif i==11:
+                self.button_toggle2 = tmp_btn
                 tmp_btn.configure(image=self.images[14])
             self.btn_lst.append(tmp_btn)
         
