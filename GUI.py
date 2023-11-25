@@ -125,6 +125,8 @@ class GUI:
                     if winner:=self.game.board.has_won():
                         self.root.after(1200, self.display_win, winner-1) # winner-1 is basically is_red?
                         # self.display_win(winner-1)
+                    elif self.game.board.is_draw():
+                        self.display_draw()
                     elif self.game.is_bot():
                         self.root.after(600, self.draw_chip, self.game.game_move(0,0))
                         # self.draw_chip(self.game.game_move(0,0)) DEBUG: Without delay
@@ -192,8 +194,8 @@ class GUI:
         if winner:=self.game.board.has_won():
             self.root.after(1200, self.display_win, winner-1) # winner-1 is basically is_red?
         elif self.game.board.is_draw(): # Handle draw aswell in handle_click
-            pass
-        self.game_frame.after(600, self.bot_battle)
+            self.game_frame.after(600, self.display_draw())
+        else: self.game_frame.after(600, self.bot_battle)
     
     def create_button(self, frame, bg, image, name, command=None):
         temp_btn = tk.Button(frame, command=command, bg=bg, bd=0, image=image, name=name)
@@ -268,8 +270,8 @@ class GUI:
         
     def change_gamemode(self,event: tk.Event): #PROOF OF CONCEPT
         print(event.widget._name)
-        modes = {"1-0": Bot(),"1-1": Bot1(), "1-2": Bot2(), "1-3": Bot2(), "1-4": Bot2(), "1-5": Player("<p1>", 1),
-                 "2-0": Bot(),"2-1": Bot1(), "2-2": Bot2(), "2-3": Bot2(), "2-4": Bot2(), "2-5": Player("<p2>", 1)}
+        modes = {"1-0": Bot(1),"1-1": Bot1(1), "1-2": Bot2(1), "1-3": Bot2(1), "1-4": Bot2(1), "1-5": Player("<p1>", 1),
+                 "2-0": Bot(2),"2-1": Bot1(2), "2-2": Bot2(2), "2-3": Bot2(2), "2-4": Bot2(2), "2-5": Player("<p2>", 2)}
         if event.widget._name[0] == "1":
             self.player1 = modes[event.widget._name]
             print(self.player1)
@@ -304,6 +306,15 @@ class GUI:
             
     def toggle_block(self):
         self.move_blocked = not self.move_blocked
+        
+    def display_draw(self):
+        for widget in self.root.winfo_children():
+            widget.pack_forget()
+        winner_canvas = tk.Canvas(self.root, bg="#434343")
+        winner_canvas.pack(fill="both", expand=1)
+        x = winner_canvas.winfo_width()/2
+        y = winner_canvas.winfo_height()/2
+        winner_canvas.create_text(x, y, font=("TR2N",62), text="DRAW", fill="white", anchor="center")
             
     def display_win(self, player):
         for widget in self.root.winfo_children():

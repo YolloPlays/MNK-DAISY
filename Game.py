@@ -1,7 +1,6 @@
 from Board import Board
 from Player import Player
 from MyBot import *
-from MyBot2 import *
 
 class Game:
     def __init__(self, board:Board, player1:Player, player2 :Player  = Bot()) -> None:
@@ -38,13 +37,15 @@ class Game:
             self.game_loop()
         
     def game_loop(self):
-        while self.game_started and not self.board.has_won():
+        while self.game_started and not self.board.has_won() and not self.board.is_draw():
             player = self.player1 if self.playerturn else self.player2
             player.make_move(self.board)
             self.board.display()
             self.playerturn = not self.playerturn
-        winner = self.player2 if self.board.has_won()-1 else self.player1
-        print(f"{winner.name} has won")
+        if self.board.has_won():
+            winner = self.player2 if self.board.has_won()-1 else self.player1
+            print(f"{winner.name} has won")
+        else: print("Full board! It's a draw")
             
         
         
