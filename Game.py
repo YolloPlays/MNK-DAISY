@@ -8,7 +8,6 @@ class Game:
         self.board = board
         self.player1 = player1
         self.player2 = player2
-        self.bot_game = type(player2) != Player
         self.playerturn = True
         self.gui = False
         self.game_started = False

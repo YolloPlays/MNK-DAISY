@@ -183,7 +183,18 @@ class GUI:
         self.stats_canvas.create_rectangle(35, 35, 311, 190, fill="#393939")
         self.stats_canvas.create_rectangle(35, 208, 311, 363, fill="#393939")
         self.stats_canvas.create_image(0, 0, image=self.images[1], anchor="nw")
+        if type(self.player1) != Player and type(self.player1) != Player:
+            self.bot_battle()
         
+    def bot_battle(self):
+        if self.game.is_bot():
+            self.game_frame.after(600, self.draw_chip, self.game.game_move(0,0))
+        if winner:=self.game.board.has_won():
+            self.root.after(1200, self.display_win, winner-1) # winner-1 is basically is_red?
+        elif self.game.board.is_draw(): # Handle draw aswell in handle_click
+            pass
+        self.game_frame.after(600, self.bot_battle)
+    
     def create_button(self, frame, bg, image, name, command=None):
         temp_btn = tk.Button(frame, command=command, bg=bg, bd=0, image=image, name=name)
         temp_btn.bind('<Enter>', self.on_enter)
@@ -257,12 +268,14 @@ class GUI:
         
     def change_gamemode(self,event: tk.Event): #PROOF OF CONCEPT
         print(event.widget._name)
-        modes = {"1-0": Player("<p1>", 1),"1-1": Bot(), "1-2": Bot1(), "1-3": Bot2(), "1-4": Bot2(),
-                 "2-0": Player("<p2>", 1),"2-1": Bot(), "2-2": Bot1(), "2-3": Bot2(), "2-4": Bot2()}
+        modes = {"1-0": Bot(),"1-1": Bot1(), "1-2": Bot2(), "1-3": Bot2(), "1-4": Bot2(), "1-5": Player("<p1>", 1),
+                 "2-0": Bot(),"2-1": Bot1(), "2-2": Bot2(), "2-3": Bot2(), "2-4": Bot2(), "2-5": Player("<p2>", 1)}
         if event.widget._name[0] == "1":
             self.player1 = modes[event.widget._name]
+            print(self.player1)
         elif event.widget._name[0] == "2":
             self.player2 = modes[event.widget._name]
+            print(self.player1)
         for btn in self.btn_lst:
             btn.configure(image=self.images[13]) if btn._name[0] == event.widget._name[0] else None
         self.button_toggle1 = event.widget
