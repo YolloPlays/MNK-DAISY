@@ -20,9 +20,9 @@ import platform
 class GUI:
     def __init__(self) -> None:
         self.paths = [r"images\LightBig.png", r"images\LightSmall.png", r"images\stick-hori.png", r"images\stick.png",
-                    r"images\circle_red.png", r"images\circle_blue.png", r"images\blue_won.png", r"images\red_won.png", r"images\play.png",
-                    r"images\play_active.png", r"images\slider.png", r"images\slider_active.png", r"images\thru.png", r"images\button_case.png",
-                    r"images\button_case_active.png", r"images\light_small_alt.png", r"images\#.png"]
+                    r"images\circle_red.png", r"images\circle_blue.png", r"images\blue_won.png", r"images\red_won.png",
+                    r"images\slider.png", r"images\slider_active.png", r"images\thru.png", r"images\button_case.png",
+                    r"images\button_case_active.png", r"images\light_small_alt.png", r"images\#.png", r"images\#_active.png"]
         if platform.system() == "Windows":
             import pyglet
             pyglet.options['win32_gdi_font'] = True # Necessary for tkinter quirk
@@ -62,16 +62,17 @@ class GUI:
         
         self.images = []
         for i, path in enumerate(self.paths):
-            if i < len(self.paths)-1:
+            if i < len(self.paths)-2:
                 self.images.append(tk.PhotoImage(file=self.paths[i]))
-        
+        self.icons = {str(i): tk.PhotoImage(file=self.paths[-2].replace('#', str(i))) for i in range(7)}
+        self.icons_active = {str(i): tk.PhotoImage(file=self.paths[-1].replace('#', str(i))) for i in range(7)}
 
         self.root.bind("<1>", self.handle_click)
         
         self.style = ttk.Style(self.stats_frame)
-        self.style.element_create('custom.Scale.trough', 'image', self.images[12])
-        self.style.element_create('custom.Horizontal.Scale.slider', 'image', self.images[10],
-                     ('active', self.images[11]))
+        self.style.element_create('custom.Scale.trough', 'image', self.images[10])
+        self.style.element_create('custom.Horizontal.Scale.slider', 'image', self.images[8],
+                     ('active', self.images[9]))
         self.style.layout('custom.Horizontal.TScale', [('custom.Scale.trough', {'sticky': 'we'}),
             ('Horizontal.Scale.trough',
                {'sticky': 'nswe',
@@ -168,10 +169,10 @@ class GUI:
     def press_play(self):
         if type(self.player1) == Player:
             name = simpledialog.askstring("Input", "P1 enter your name:", parent=self.root)
-            self.player1.name = name
+            self.player1.name = name[:7]
         if type(self.player2) == Player:
             name = simpledialog.askstring("Input", "P2 enter your name:", parent=self.root)
-            self.player2.name = name
+            self.player2.name = name[:7]
         self.game = Game(Board(self.m, self.n, self.k), self.player1, self.player2)
         self.slider_frame.destroy()
         self.play_button.destroy()
@@ -208,7 +209,7 @@ class GUI:
         BTN_SIZE = 75
         PADDING = 18
         def create_gmbtn(name):
-            return self.create_button(self.selection_frame, bg="#393939", image=self.images[13], name=name)
+            return self.create_button(self.selection_frame, bg="#393939", image=self.icons[name[-1]], name=name)
         
         for i in range(self.BUTTON_COUNT*2):
             tmp_btn = create_gmbtn(f"{(i//self.BUTTON_COUNT)+1}-{i%self.BUTTON_COUNT}")
@@ -216,10 +217,10 @@ class GUI:
             tmp_btn.bind("<1>", self.change_gamemode)
             if i==5:
                 self.button_toggle1 = tmp_btn
-                tmp_btn.configure(image=self.images[14])
+                tmp_btn.configure(image=self.icons_active[tmp_btn._name[-1]])
             elif i==11:
                 self.button_toggle2 = tmp_btn
-                tmp_btn.configure(image=self.images[14])
+                tmp_btn.configure(image=self.icons_active[tmp_btn._name[-1]])
             self.btn_lst.append(tmp_btn)
         
                         
@@ -228,7 +229,7 @@ class GUI:
         self.game_canvas.pack()
         self.game_canvas.create_rectangle(35, 35, 436, 436, fill="#393939")
         self.game_canvas.create_image(0, 0, image=self.images[0], anchor="nw")
-        self.play_button = self.create_button(self.game_frame, command=self.press_play, bg="#434343", image=self.images[8], name="play")
+        self.play_button = self.create_button(self.game_frame, command=self.press_play, bg="#434343", image=self.icons["6"], name="6")
         self.play_button.pack(side="top")
         
         self.stats_canvas = tk.Canvas(self.selection_frame, width=347, height=399, bg="#434343", highlightthickness=0)
@@ -241,7 +242,7 @@ class GUI:
         self.k_slide.pack()
         # self.stats_canvas.create_rectangle(35, 35, 311, 190, fill="#393939")
         # self.stats_canvas.create_rectangle(35, 208, 311, 363, fill="#393939")
-        self.stats_canvas.create_image(0, 0, image=self.images[15], anchor="nw")
+        self.stats_canvas.create_image(0, 0, image=self.images[13], anchor="nw")
         
     def draw_slider(self):
         self.slider_label_frame = tk.Frame(self.slider_frame, bg="#434343")
@@ -264,25 +265,23 @@ class GUI:
         
     def on_leave(self, event):
         if event.widget != self.button_toggle1 and event.widget != self.button_toggle2:
-            event.widget.config(image=self.images[13])
+            event.widget.config(image=self.icons[event.widget._name[-1]])
     def on_enter(self, event: tk.Event):
-        event.widget.config(image=self.images[14])
+        event.widget.config(image=self.icons_active[event.widget._name[-1]])
         
     def change_gamemode(self,event: tk.Event): #PROOF OF CONCEPT
-        print(event.widget._name)
         modes = {"1-0": Bot(1),"1-1": Bot1(1), "1-2": Bot2(1), "1-3": Bot2(1), "1-4": Bot2(1), "1-5": Player("<p1>", 1),
                  "2-0": Bot(2),"2-1": Bot1(2), "2-2": Bot2(2), "2-3": Bot2(2), "2-4": Bot2(2), "2-5": Player("<p2>", 2)}
         if event.widget._name[0] == "1":
             self.player1 = modes[event.widget._name]
-            print(self.player1)
         elif event.widget._name[0] == "2":
             self.player2 = modes[event.widget._name]
-            print(self.player1)
         for btn in self.btn_lst:
-            btn.configure(image=self.images[13]) if btn._name[0] == event.widget._name[0] else None
+            btn.configure(image=self.icons[btn._name[-1]]) if btn._name[0] == event.widget._name[0] else None
         self.button_toggle1 = event.widget
-        # For more pics just replace with tk.PhotoImage(file=self.paths[16].replace('#', btn._name))
-        event.widget.configure(image=self.images[14]) # tk.PhotoImage(file=self.paths[17].replace('#', event.widget._name))
+        # For more pics just replace with tk.PhotoImage(file=self.paths[-2].replace('#', btn._name))
+
+        event.widget.configure(image=self.icons_active[event.widget._name[-1]]) # tk.PhotoImage(file=self.paths[-1].replace('#', event.widget._name))
                         
     def draw_grid(self):
         self.draw_rows()
@@ -326,8 +325,10 @@ class GUI:
         winner_canvas.create_text(263, 295, font=("TR2N",62), text=winner_txt, fill="white")
         
     def debug(self, event):
-        print(f"GUI: m: {self.m} n: {self.n} k: {self.k}")
-        print(f"Board: m: {self.game.board.m} n: {self.game.board.n} k: {self.game.board.k}")
+        # print(f"GUI: m: {self.m} n: {self.n} k: {self.k}")
+        # print(f"Board: m: {self.game.board.m} n: {self.game.board.n} k: {self.game.board.k}")
+        lsst = [btn._name for btn in self.btn_lst]
+        print(lsst)
         
         
 if __name__ == "__main__":

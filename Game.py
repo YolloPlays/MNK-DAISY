@@ -3,7 +3,7 @@ from Player import Player
 from MyBot import *
 
 class Game:
-    def __init__(self, board:Board, player1:Player, player2 :Player  = Bot()) -> None:
+    def __init__(self, board:Board, player1:Player, player2:Player  = Bot(2)) -> None:
         self.board = board
         self.player1 = player1
         self.player2 = player2
@@ -45,10 +45,11 @@ class Game:
         if self.board.has_won():
             winner = self.player2 if self.board.has_won()-1 else self.player1
             print(f"{winner.name} has won")
+            self.board.display()
         else: print("Full board! It's a draw")
             
         
         
 if __name__ == "__main__":
-    game = Game(Board(), Player("Klaus", 1))
+    game = Game(Board(), Bot2(1), Bot2(2))
     game.start()
