@@ -7,8 +7,8 @@ class Bot(Player):
     Random Bot. Places randomly on free cells
 
     """
-    def __init__(self):
-        super().__init__("KI", 2)
+    def __init__(self, number):
+        super().__init__("KI", number)
 
     def make_move(self, board, m=None, n=None):
         """_summary_
@@ -31,8 +31,8 @@ class Bot1(Player):
     Blocker bot. Reacts when opponent has two or more in a row, in a col or diagonal.
 
     """
-    def __init__(self):
-        super().__init__("KI", 2)
+    def __init__(self, number):
+        super().__init__("KI", number)
 
     def make_move(self, board, m=None, n=None):
         # Check on board if human player has 2 or more in a row, col oder diag
@@ -90,10 +90,8 @@ class Bot2(Player):
     """
     Blocker Bot with new features. 
     """
-    def __init__(self):
-        super().__init__("KI", 2)
-        self.is_bot = True
-
+    def __init__(self, number):
+        super().__init__("KI", number)
 
     def make_move(self, board, m=None, n=None):
         # Check on board if human player has 2 or more in a row, col oder diag
