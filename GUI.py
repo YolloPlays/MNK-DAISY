@@ -115,7 +115,7 @@ class GUI:
                     results = self.game.game_move(m=idx % self.m, n=int(idx/self.m))
                     self.move_blocked = True
                     self.draw_chip(results)
-                    self.root.after(700, self.toggle_block)
+                    self.root.after(200, self.toggle_block)
                     if winner:=self.game.board.has_won():
                         self.root.after(1200, self.display_win, winner-1) # winner-1 is basically is_red?
                     elif self.game.board.is_draw():
@@ -123,7 +123,8 @@ class GUI:
                     elif self.game.is_bot():
                         self.root.after(600, self.draw_chip, self.game.game_move(0,0))
                         self.root.after(601, self.handle_draw, self.game.board.is_draw())
-                        # self.draw_chip(self.game.game_move(0,0)) DEBUG: Without delay
+                        # self.draw_chip(self.game.game_move(0,0)) #DEBUG: Without delay
+                        # self.handle_draw(self.game.board.is_draw())
     def handle_draw(self, draw):
         if draw:
             self.display_draw()
@@ -164,10 +165,12 @@ class GUI:
         
     def press_play(self):
         if type(self.player1) == Player:
-            name = simpledialog.askstring("Input", "P1 enter your name:", parent=self.root)
+            name = simpledialog.askstring("Input", "P1 enter your name: (1-7)", parent=self.root)
+            if name is None: return
             self.player1.name = name[:7]
         if type(self.player2) == Player:
-            name = simpledialog.askstring("Input", "P2 enter your name:", parent=self.root)
+            name = simpledialog.askstring("Input", "P2 enter your name: (1-7)", parent=self.root)
+            if name == None: return
             self.player2.name = name[:7]
         self.game = Game(Board(self.m, self.n, self.k), self.player1, self.player2)
         self.slider_frame.destroy()
@@ -185,13 +188,13 @@ class GUI:
         if type(self.player1) != Player and type(self.player2) != Player:
             self.bot_battle()
         elif type(self.player1) != Player:
-            self.game_frame.after(300, self.draw_chip, self.game.game_move(0,0))
+            self.game_frame.after(100, self.draw_chip, self.game.game_move(0,0))
         
     def bot_battle(self):
         if self.game.is_bot():
-            self.game_frame.after(600, self.draw_chip, self.game.game_move(0,0))
+            self.draw_chip(self.game.game_move(0,0))
         if winner:=self.game.board.has_won():
-            self.root.after(1200, self.display_win, winner-1) # winner-1 is basically is_red?
+            self.root.after(600, self.display_win, winner-1) # winner-1 is basically is_red?
         elif self.game.board.is_draw():
             self.game_frame.after(600, self.display_draw())
         else: self.game_frame.after(600, self.bot_battle)
