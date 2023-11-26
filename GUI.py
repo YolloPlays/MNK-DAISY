@@ -22,7 +22,7 @@ class GUI:
         self.paths = [r"images\LightBig.png", r"images\LightSmall.png", r"images\stick-hori.png", r"images\stick.png",
                     r"images\circle_red.png", r"images\circle_blue.png", r"images\blue_won.png", r"images\red_won.png",
                     r"images\slider.png", r"images\slider_active.png", r"images\thru.png", r"images\button_case.png",
-                    r"images\button_case_active.png", r"images\light_small_alt.png", r"images\#.png", r"images\#_active.png"]
+                    r"images\button_case_active.png", r"images\light_small_alt.png", r"images\MNKLogo.ico", r"images\#.png", r"images\#_active.png"]
         if platform.system() == "Windows":
             import pyglet
             pyglet.options['win32_gdi_font'] = True # Necessary for tkinter quirk
@@ -62,7 +62,7 @@ class GUI:
         
         self.images = []
         for i, path in enumerate(self.paths):
-            if i < len(self.paths)-2:
+            if i < len(self.paths)-3:
                 self.images.append(tk.PhotoImage(file=self.paths[i]))
         self.icons = {str(i): tk.PhotoImage(file=self.paths[-2].replace('#', str(i))) for i in range(7)}
         self.icons_active = {str(i): tk.PhotoImage(file=self.paths[-1].replace('#', str(i))) for i in range(7)}
@@ -93,6 +93,7 @@ class GUI:
         self.draw_gamemode_buttons()
         self.playersturn = True
 
+        self.root.iconbitmap(self.paths[-3])
         self.root.mainloop()
         
     def delete_rows(self, event=None): #DEBUG
