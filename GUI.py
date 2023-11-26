@@ -174,6 +174,18 @@ class GUI:
         self.stats_canvas.create_rectangle(35, 35, 311, 190, fill="#393939")
         self.stats_canvas.create_rectangle(35, 208, 311, 363, fill="#393939")
         self.stats_canvas.create_image(0, 0, image=self.images[1], anchor="nw")
+        p1_frame = tk.Frame(self.stats_frame, bg="#393939")
+        player1_label = tk.Label(p1_frame, text=self.player1.name, font=("TR2N", 40), bg="#393939", fg="white")
+        player1_label.pack()
+        player1_chip = tk.Label(p1_frame, image=self.images[5], bg="#393939")
+        player1_chip.pack(side="bottom")
+        p1_frame.place(x=175, y=110, anchor="center")
+        p2_frame = tk.Frame(self.stats_frame, bg="#393939")
+        player2_label = tk.Label(p2_frame, text=self.player2.name, font=("TR2N", 40), bg="#393939", fg="white")
+        player2_label.pack()
+        player2_chip = tk.Label(p2_frame, image=self.images[4], bg="#393939")
+        player2_chip.pack(side="bottom")
+        p2_frame.place(x=175, y=282, anchor="center")
         if type(self.player1) != Player and type(self.player2) != Player:
             self.bot_battle()
         elif type(self.player1) != Player:
