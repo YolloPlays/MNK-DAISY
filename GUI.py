@@ -130,7 +130,11 @@ class GUI:
                         self.display_draw()
                     elif self.game.is_bot():
                         self.root.after(600, self.draw_chip, self.game.game_move(0,0))
+                        self.root.after(601, self.handle_draw, self.game.board.is_draw())
                         # self.draw_chip(self.game.game_move(0,0)) DEBUG: Without delay
+    def handle_draw(self, draw):
+        if draw:
+            self.display_draw()
     
         
     def scale_change_m(self, valstr):
@@ -186,8 +190,10 @@ class GUI:
         self.stats_canvas.create_rectangle(35, 35, 311, 190, fill="#393939")
         self.stats_canvas.create_rectangle(35, 208, 311, 363, fill="#393939")
         self.stats_canvas.create_image(0, 0, image=self.images[1], anchor="nw")
-        if type(self.player1) != Player and type(self.player1) != Player:
+        if type(self.player1) != Player and type(self.player2) != Player:
             self.bot_battle()
+        elif type(self.player1) != Player:
+            self.game_frame.after(300, self.draw_chip, self.game.game_move(0,0))
         
     def bot_battle(self):
         if self.game.is_bot():
@@ -311,8 +317,8 @@ class GUI:
             widget.pack_forget()
         winner_canvas = tk.Canvas(self.root, bg="#434343")
         winner_canvas.pack(fill="both", expand=1)
-        x = winner_canvas.winfo_width()/2
-        y = winner_canvas.winfo_height()/2
+        x = self.root.winfo_width()/2
+        y = self.root.winfo_height()/2
         winner_canvas.create_text(x, y, font=("TR2N",62), text="DRAW", fill="white", anchor="center")
             
     def display_win(self, player):
