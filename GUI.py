@@ -40,28 +40,17 @@ class GUI:
         self.root.title("MNK")
         self.root.configure(bg="#434343")
         self.root.geometry("1000x700")
-
-        self.game_frame = tk.Frame(self.root, bg="#434343")
-        self.game_frame.pack(padx=64, pady=64, side="left", fill="both")
-
-        self.stats_frame = tk.Frame(self.root, bg="#434343")
-        self.stats_frame.pack(padx=20, pady=64, side="right", fill="both")
+        
         self.button_toggle1 = None
         self.button_toggle2 = None
         self.player1 = Player("<p>",1)
         self.player2 = Player("<p>",2)
+
+        self.draw_pre_frames()
         
-        self.slider_frame = tk.Frame(self.stats_frame, bg="#434343")
-        self.slider_frame.pack(padx=20, pady=10, side="top", fill="x")
-        self.selection_frame = tk.Frame(self.stats_frame, bg="#434343")
-        self.selection_frame.pack(side="top", fill="x")
-        
-        self.images = []
-        for i, path in enumerate(self.paths):
-            if i < len(self.paths)-3:
-                self.images.append(tk.PhotoImage(file=self.paths[i]))
-        self.icons = {str(i): tk.PhotoImage(file=self.paths[-2].replace('#', str(i))) for i in range(7)}
-        self.icons_active = {str(i): tk.PhotoImage(file=self.paths[-1].replace('#', str(i))) for i in range(7)}
+        self.images = [tk.PhotoImage(file=path) for path in self.paths[:-3]]
+        self.icons = {str(i): tk.PhotoImage(file=self.paths[-2].replace('#', str(i))) for i in range(8)}
+        self.icons_active = {str(i): tk.PhotoImage(file=self.paths[-1].replace('#', str(i))) for i in range(8)}
 
         self.root.bind("<1>", self.handle_click)
         
@@ -224,6 +213,18 @@ class GUI:
                 tmp_btn.configure(image=self.icons_active[tmp_btn._name[-1]])
             self.btn_lst.append(tmp_btn)
         
+        
+    def draw_pre_frames(self):
+        self.game_frame = tk.Frame(self.root, bg="#434343")
+        self.game_frame.pack(padx=64, pady=64, side="left", fill="both")
+
+        self.stats_frame = tk.Frame(self.root, bg="#434343")
+        self.stats_frame.pack(padx=20, pady=64, side="right", fill="both")
+        
+        self.slider_frame = tk.Frame(self.stats_frame, bg="#434343")
+        self.slider_frame.pack(padx=20, pady=10, side="top", fill="x")
+        self.selection_frame = tk.Frame(self.stats_frame, bg="#434343")
+        self.selection_frame.pack(side="top", fill="x")
                         
     def draw_game(self):
         self.game_canvas = tk.Canvas(self.game_frame, width=472, height=472, bg="#434343", highlightthickness=0)
@@ -303,21 +304,44 @@ class GUI:
         
     def display_draw(self):
         for widget in self.root.winfo_children():
-            widget.pack_forget()
-        winner_canvas = tk.Canvas(self.root, bg="#434343")
-        winner_canvas.pack(fill="both", expand=1)
+            widget.destroy()
+        self.end_canvas = tk.Canvas(self.root, bg="#434343")
+        self.end_canvas.pack(fill="both", expand=1)
         x = self.root.winfo_width()/2
         y = self.root.winfo_height()/2
-        winner_canvas.create_text(x, y, font=("TR2N",62), text="DRAW", fill="white", anchor="center")
+        self.end_canvas.create_text(x, y, font=("TR2N",62), text="DRAW", fill="white", anchor="center")
+        reset_btn = self.create_button(self.root, bg="#434343", image=self.icons["7"], name="7")
+        reset_btn.place(x=x,y=y*2-100,anchor="center")
+        reset_btn.bind("<1>", self.reset)
+        
             
     def display_win(self, player):
         for widget in self.root.winfo_children():
-            widget.pack_forget()
-        winner_canvas = tk.Canvas(self.root, bg="#434343")
-        winner_canvas.pack(fill="both", expand=1)
+            widget.destroy()
+        self.end_canvas = tk.Canvas(self.root, bg="#434343")
+        self.end_canvas.pack(fill="both", expand=1)
         winner_img, winner_txt = (self.images[6], self.game.player1.name) if not player else (self.images[7], self.game.player2.name)
-        winner_canvas.create_image(0, 0, image=winner_img, anchor="nw")
-        winner_canvas.create_text(263, 295, font=("TR2N",62), text=winner_txt, fill="white")
+        self.end_canvas.create_image(0, 0, image=winner_img, anchor="nw")
+        self.end_canvas.create_text(263, 295, font=("TR2N",62), text=winner_txt, fill="white")
+        reset_btn = self.create_button(self.root, bg="#434343", image=self.icons["7"], name="7")
+        x = self.root.winfo_width()/2
+        y = self.root.winfo_height() -100
+        reset_btn.place(x=x, y=y, anchor="center")
+        reset_btn.bind("<1>", self.reset)
+        
+    def reset(self, event):
+        self.end_canvas.destroy()
+        event.widget.destroy()
+        self.draw_pre_frames()
+        self.m = 5
+        self.n = 5
+        self.k = 4
+        self.draw_slider()
+        self.draw_game()
+        self.draw_grid()
+        self.draw_gamemode_buttons()
+        self.playersturn = True
+                
         
     def debug(self, event):
         lsst = [btn._name for btn in self.btn_lst]
