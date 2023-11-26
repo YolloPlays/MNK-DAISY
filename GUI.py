@@ -15,8 +15,6 @@ from PIL import Image,ImageTk
 import itertools as it
 import platform
 
-# TODO: Let GUI make game. start button needed 
-
 class GUI:
     def __init__(self) -> None:
         self.paths = [r"images\LightBig.png", r"images\LightSmall.png", r"images\stick-hori.png", r"images\stick.png",
@@ -55,8 +53,6 @@ class GUI:
         
         self.slider_frame = tk.Frame(self.stats_frame, bg="#434343")
         self.slider_frame.pack(padx=20, pady=10, side="top", fill="x")
-        # self.place_holder1 = tk.Canvas(self.slider_frame, width=1, height=20, bg="#434343", highlightthickness=0)
-        # self.place_holder1.pack()
         self.selection_frame = tk.Frame(self.stats_frame, bg="#434343")
         self.selection_frame.pack(side="top", fill="x")
         
@@ -79,14 +75,10 @@ class GUI:
                 'children': [('custom.Horizontal.Scale.slider',
                               {'side': 'left', 'sticky': ''})]})])
         self.style.configure('custom.Horizontal.TScale', background="#434343")
-                
-        #Move to start
-        # self.game: Game = Game(Board(), Player("<PLACEHOLDER>",1), Player("<PLACEHOLDER>",2)) # DEBUG: Will later be replaced by buttons
-        # self.game.gui = True
+        
         self.m = 5
         self.n = 5
         self.k = 4
-        self.root.bind("<space>", self.debug) #DEBUG
         self.draw_slider()
         self.draw_game()
         self.draw_grid()
@@ -96,7 +88,7 @@ class GUI:
         self.root.iconbitmap(self.paths[-3])
         self.root.mainloop()
         
-    def delete_rows(self, event=None): #DEBUG
+    def delete_rows(self, event=None):
         self.game_canvas.delete("row")
         self.vertical_coords = []
     def delete_cols(self, event=None):
@@ -126,7 +118,6 @@ class GUI:
                     self.root.after(700, self.toggle_block)
                     if winner:=self.game.board.has_won():
                         self.root.after(1200, self.display_win, winner-1) # winner-1 is basically is_red?
-                        # self.display_win(winner-1)
                     elif self.game.board.is_draw():
                         self.display_draw()
                     elif self.game.is_bot():
@@ -201,7 +192,7 @@ class GUI:
             self.game_frame.after(600, self.draw_chip, self.game.game_move(0,0))
         if winner:=self.game.board.has_won():
             self.root.after(1200, self.display_win, winner-1) # winner-1 is basically is_red?
-        elif self.game.board.is_draw(): # Handle draw aswell in handle_click
+        elif self.game.board.is_draw():
             self.game_frame.after(600, self.display_draw())
         else: self.game_frame.after(600, self.bot_battle)
     
@@ -247,8 +238,6 @@ class GUI:
         self.m_slide.pack()
         self.n_slide.pack()
         self.k_slide.pack()
-        # self.stats_canvas.create_rectangle(35, 35, 311, 190, fill="#393939")
-        # self.stats_canvas.create_rectangle(35, 208, 311, 363, fill="#393939")
         self.stats_canvas.create_image(0, 0, image=self.images[13], anchor="nw")
         
     def draw_slider(self):
@@ -286,18 +275,14 @@ class GUI:
         for btn in self.btn_lst:
             btn.configure(image=self.icons[btn._name[-1]]) if btn._name[0] == event.widget._name[0] else None
         self.button_toggle1 = event.widget
-        # For more pics just replace with tk.PhotoImage(file=self.paths[-2].replace('#', btn._name))
 
-        event.widget.configure(image=self.icons_active[event.widget._name[-1]]) # tk.PhotoImage(file=self.paths[-1].replace('#', event.widget._name))
+        event.widget.configure(image=self.icons_active[event.widget._name[-1]])
                         
     def draw_grid(self):
         self.draw_rows()
         self.draw_cols()
         for y,x in it.product(self.vertical_coords, self.horizontal_coords):
             self.cartesian.append((x,y))
-        # for i in self.cartesian: #DEBUG
-        #     self.game_canvas.create_rectangle(i[0]-7,i[1]-7,i[0]+20,i[1]+20)
-        # print(self.cartesian)
             
     def draw_cols(self):
         for i in range(1, self.m + 1):
@@ -332,12 +317,9 @@ class GUI:
         winner_canvas.create_text(263, 295, font=("TR2N",62), text=winner_txt, fill="white")
         
     def debug(self, event):
-        # print(f"GUI: m: {self.m} n: {self.n} k: {self.k}")
-        # print(f"Board: m: {self.game.board.m} n: {self.game.board.n} k: {self.game.board.k}")
         lsst = [btn._name for btn in self.btn_lst]
         print(lsst)
         
         
 if __name__ == "__main__":
-    # Game.Game(Board.Board(), Player.Player("Klaus", 1), Player.Player("Peter", 2))
     GUI()
