@@ -101,7 +101,7 @@ class GUI:
         if self.game_started and event.widget == self.game_canvas and not self.move_blocked:
             for idx, i in enumerate(self.cartesian):
                 if self.on_grid(event, i):
-                    results = self.game.game_move(m=idx % self.m, n=int(idx/self.m))
+                    results = self.game.game_move(m=idx % self.m, n=idx//self.m)
                     self.move_blocked = True
                     self.draw_chip(results)
                     self.root.after(200, self.toggle_block)
@@ -165,9 +165,7 @@ class GUI:
         self.slider_frame.destroy()
         self.play_button.destroy()
         self.selection_frame.destroy()
-        self.cartesian = []
-        for y,x in it.product(self.vertical_coords, self.horizontal_coords):
-            self.cartesian.append((x,y))
+        self.draw_grid()
         self.game_started = True
         self.stats_canvas = tk.Canvas(self.stats_frame, width=347, height=399, bg="#434343", highlightthickness=0)
         self.stats_canvas.pack()
@@ -295,17 +293,22 @@ class GUI:
         event.widget.configure(image=self.icons_active[event.widget._name[-1]])
                         
     def draw_grid(self):
+        self.cartesian = []
         self.draw_rows()
         self.draw_cols()
         for y,x in it.product(self.vertical_coords, self.horizontal_coords):
             self.cartesian.append((x,y))
             
     def draw_cols(self):
+        self.horizontal_coords = []
+        self.delete_cols()
         for i in range(1, self.m + 1):
             x = (400/(self.m + 1)) * i  + 29
             self.game_canvas.create_image(x, 36, image=self.images[3], anchor="nw", tags="col")
             self.horizontal_coords.append(x)
     def draw_rows(self):
+        self.vertical_coords = []
+        self.delete_rows()
         for i in range(1, self.n + 1):
             y = (400/(self.n + 1)) * i  + 29
             self.game_canvas.create_image(36, y, image=self.images[2], anchor="nw", tags="row")
