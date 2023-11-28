@@ -67,5 +67,5 @@ class Game:
             self.f.write(f"{string}\n")
         
 if __name__ == "__main__":
-    game = Game(Board(), Bot2(1), Bot2(2), should_log=True, repeat=50000, should_print=False)
+    game = Game(Board(), Bot2(1), Bot2(2))
     game.start()
