@@ -35,7 +35,7 @@ def draw_board():
     b_m = rand.randint(3, 10)
     b_n = rand.randint(3, 10)
     b_k = rand.randint(2, max(b_m-1, b_n-1))
-    board = Board(5, 5, 4,)
+    board = Board(b_m, b_n, b_k,)
     vertical_coords = []
     horizontal_coords = []
     cartesian = []
