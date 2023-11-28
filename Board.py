@@ -5,11 +5,7 @@ class Board:
         self.m = m
         self.n = n
         self.k = k
-        self.array = self.make_array(self.m, self.n)
-
-    @classmethod
-    def make_array(self, m, n, k=None):
-        return  np.zeros((n, m))
+        self.array = np.zeros((n, m))
     
     def display(self):
         print(self.array)
@@ -57,8 +53,9 @@ class Board:
                         return False
             return True
         return self.has_won() == 0 and is_full()
-
-
+    
+    def reset(self):
+        self.array = np.zeros((self.n, self.m))
             
 if __name__ == "__main__":
     board = Board(2,2,2)

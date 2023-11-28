@@ -8,7 +8,7 @@ class Bot(Player):
 
     """
     def __init__(self, number):
-        super().__init__("KI", number)
+        super().__init__("KI"+str(number), number)
 
     def make_move(self, board, m=None, n=None):
         """_summary_
@@ -82,7 +82,7 @@ class Bot1(Player):
             
         # Randomly select a cell to place the disc from all cells or just cells nearby opponent
         n,m = choice(cells_to_set)
-        print(f'Spalte {m+1} , Zeile {n+1}')
+        # print(f'Spalte {m+1} , Zeile {n+1}')
         return super().make_move(board, m, n)
 
 
@@ -146,10 +146,10 @@ class Bot2(Player):
         if len(set_list) == 0:
             set_list = empty_cells_higher_prob      
         
-        print(set_list)
+        # print(set_list)
         # Randomly select a cell to place the disc
         n, m = choice(set_list)
-        print(f'Spalte {m+1} , Zeile {n+1}')
+        # print(f'Spalte {m+1} , Zeile {n+1}')
         return super().make_move(board, m, n)
 
     
