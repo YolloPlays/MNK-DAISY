@@ -35,7 +35,7 @@ def draw_board():
     b_m = rand.randint(3, 10)
     b_n = rand.randint(3, 10)
     b_k = rand.randint(2, max(b_m-1, b_n-1))
-    board = Board(b_m, b_n, b_k,)
+    board = Board(10, 10, 4,)
     vertical_coords = []
     horizontal_coords = []
     cartesian = []
@@ -76,7 +76,11 @@ def draw_chip(results):
         canvas.create_oval(i[0]-10, i[1]-10, i[0]+10, i[1]+10, fill="blue" if results[1] else "red")
 
 def log(idx, array: np.array, m, n, k):
-    file.write(f"{array.flatten()};{m};{n};{k};{idx}\n")
+    for i in np.nditer(array):
+        file.write(f"{i},")
+    for _ in range(10**2-array.size):
+        file.write("NaN,")
+    file.write(f"{m},{n},{k},{idx}\n")
 
 draw_board()
 root.mainloop()
