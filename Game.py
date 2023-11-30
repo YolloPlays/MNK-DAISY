@@ -1,6 +1,7 @@
 from Board import Board
 from Player import Player
 from MyBot import *
+from MyAi import BotAI
 
 class Game:
     def __init__(self, board:Board, player1:Player, player2:Player  = Bot(2), **kwargs) -> None:
@@ -67,5 +68,5 @@ class Game:
             self.f.write(f"{string}\n")
         
 if __name__ == "__main__":
-    game = Game(Board(), Bot2(1), Bot2(2))
+    game = Game(Board(), Player("J", 1), BotAI(2))
     game.start()

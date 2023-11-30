@@ -19,7 +19,7 @@ vertical_coords = []
 horizontal_coords = []
 cartesian = []
 
-file = open("data.csv", "a")
+file = open("data5x5.csv", "a")
 frame = tk.Frame(root)
 frame.pack(side="top")
 label = tk.Label(frame)
@@ -35,7 +35,7 @@ def draw_board():
     b_m = rand.randint(3, 10)
     b_n = rand.randint(3, 10)
     b_k = rand.randint(2, max(b_m-1, b_n-1))
-    board = Board(10, 10, 4,)
+    board = Board(5, 5, 4)
     vertical_coords = []
     horizontal_coords = []
     cartesian = []
@@ -78,8 +78,8 @@ def draw_chip(results):
 def log(idx, array: np.array, m, n, k):
     for i in np.nditer(array):
         file.write(f"{i},")
-    for _ in range(10**2-array.size):
-        file.write("NaN,")
+    # for _ in range(10**2-array.size):
+    #     file.write("NaN,")
     file.write(f"{m},{n},{k},{idx}\n")
 
 draw_board()
