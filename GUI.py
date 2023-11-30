@@ -156,10 +156,14 @@ class GUI:
         if type(self.player1) == Player:
             name = simpledialog.askstring("Input", "P1 enter your name: (1-7)", parent=self.root)
             if name is None: return
+            elif len(name) > 7:
+                name = simpledialog.askstring("Input", "P1 name must be less than 7", parent=self.root)
             self.player1.name = name[:7]
         if type(self.player2) == Player:
             name = simpledialog.askstring("Input", "P2 enter your name: (1-7)", parent=self.root)
             if name == None: return
+            elif len(name) > 7:
+                name = simpledialog.askstring("Input", "P2 name must be less than 7", parent=self.root)
             self.player2.name = name[:7]
         self.game = Game(Board(self.m, self.n, self.k), self.player1, self.player2)
         self.slider_frame.destroy()
