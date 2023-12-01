@@ -13,8 +13,30 @@ def move(game):
                 return
     board_at = game.board.array
     _,_, chip_at = game.game_move(0,0)
-    if game.board.has_won():
+    if game.board.has_won() == 1:
         return (chip_at, board_at)
+    
+def move_paths(game):
+    for _ in range(rand.randint(2, max(game.board.array.size-4,3))):
+            game.game_move(0,0)
+            if game.board.has_won() or game.board.is_draw():
+                return
+    board_at = game.board.array
+    tmp_at = None
+    moves_needed = np.inf
+    tmp_count = None
+    while not game.board.has_won() and not game.board.is_draw():
+        res = game.game_move(0,0)
+        tmp_count+=1
+        if game.board.has_won() == 1:
+            if tmp_count < moves_needed:
+                moves_needed = tmp_count
+                tmp_at = res[2]
+            break
+        elif not game.board.is_draw(): game.game_move(0,0)
+    return (tmp_at, board_at)
+    
+        
     # for _ in range(rand.randint(2, max(game.board.array.size-4,3))):
     #         game.game_move(0,0)
     #         if game.board.has_won():
@@ -26,8 +48,13 @@ def log(tup):
         for i in np.nditer(tup[1]):
             file.write(f"{i},")
         file.write(f"{5},{5},{4},{tup[0][0]*5+tup[0][1]}\n")
-        
-for i in range(1000000):
+
+i = 0
+for _ in range(1000000):
     if i % 500 == 0:
         print(i)
-    log(move(Game(Board(5, 5, 4), Bot2(1), Bot2(2))))
+        i+=1
+    mv = move(Game(Board(5, 5, 4), Bot2(1), Bot2(2)))
+    log(mv)
+    if mv:
+        i += 1
