@@ -21,19 +21,17 @@ def move_paths(game):
             game.game_move(0,0)
             if game.board.has_won() or game.board.is_draw():
                 return
-    board_at = game.board.array
-    tmp_at = None
-    moves_needed = np.inf
-    tmp_count = None
-    while not game.board.has_won() and not game.board.is_draw():
-        res = game.game_move(0,0)
+    game_copy = game.copy()
+    chip_at = None
+    tmp_count = np.inf
+    while not game_copy.board.has_won() and not game_copy.board.is_draw():
+        res = game_copy.game_move(0,0)
         tmp_count+=1
-        if game.board.has_won() == 1:
+        if game_copy.board.has_won() == 1:
             if tmp_count < moves_needed:
                 moves_needed = tmp_count
                 tmp_at = res[2]
-            break
-        elif not game.board.is_draw(): game.game_move(0,0)
+        elif not game_copy.board.is_draw(): game.game_move(0,0)
     return (tmp_at, board_at)
     
         
