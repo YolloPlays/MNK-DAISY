@@ -2,21 +2,27 @@ from Board import Board
 from Player import Player
 from MyBot import *
 from MyAi import BotAI
+import random as rr
 
 class Game:
     def __init__(self, board:Board, player1:Player, player2:Player  = Bot(2), **kwargs) -> None:
         self.board = board
         self.player1 = player1
         self.player2 = player2
-        self.playerturn = True
+        self.shuffle = kwargs.get("shuffle")
+        self.starting_player = bool(rr.getrandbits(1)) if self.shuffle else True
+        self.playerturn = self.starting_player
         self.gui = False
         self.game_started = False
         self.should_log = kwargs.get("should_log") if kwargs.get("should_log") != None else False
-        self.repeat = kwargs.get("repeat") if kwargs.get("repeat") else 1
+        self.repeat = a if (a:=kwargs.get("repeat")) else 1
         self.should_print = kwargs.get("should_print") if kwargs.get("should_print") != None else True
         if self.should_log:
-            with open("log.csv", "w") as f:
-                f.write("starting number ; winning number\n")
+            try:
+                with open("log.csv", "x") as f:
+                    f.write("starting player,winning number\n")
+            except Exception:
+                print("File already created, beginning to append")
             self.f = open("log.csv", "a")
         
     def game_move(self, m, n):
@@ -55,11 +61,14 @@ class Game:
                 winner = self.player2 if self.board.has_won()-1 else self.player1
                 print(f"{winner.name} has won") if self.should_print else None
                 self.board.display() if self.should_print else None
-                self.log(f"1 ; {winner.player_number}")
+                self.log(f"{int(not self.starting_player)+1},{winner.player_number}")
             else: 
                 print("Full board! It's a draw") if self.should_print else None
-                self.log(f"1 ; 0")
+                self.log(f"{int(not self.starting_player)+1},0")
             self.board.reset()
+            if self.shuffle:
+                self.starting_player = bool(rr.getrandbits(1))
+                self.playerturn = self.starting_player
             print("\n\n\n\n\n") if self.should_print else None
         print(i) # <= Debug
     
@@ -68,5 +77,5 @@ class Game:
             self.f.write(f"{string}\n")
         
 if __name__ == "__main__":
-    game = Game(Board(), Player("J", 1), Bot(2))
+    game = Game(Board(), Bot(1), Bot(2), should_log=True, repeat=10000, shuffle=True, should_print=False)
     game.start()
