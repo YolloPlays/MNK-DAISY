@@ -220,6 +220,7 @@ class Bot2(Player):
 
         Returns:
             int: _distance_ to the edge of the board
+            
         """
         distance = min(min(row, col), min(board.n-row-1, board.m-col-1))
         
