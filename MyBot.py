@@ -149,6 +149,13 @@ class Bot2(Player):
 
         Returns:
             tuple: The row and column numbers of the best move.
+        
+        This function generates a move for the current player by checking if the opponent has k-1 or more in a row, col or diag.
+        It checks the number of x in a row descending from k-1 to 1. 
+        If the opponent doex have x in a row it will break the loop. 
+        It will enable to first block the opponent where it has higher numbers of x in a row.
+        
+        
         """
         
         # Check on board if human player has 2 or more in a row, col oder diag
@@ -159,7 +166,7 @@ class Bot2(Player):
         
         for check_for in range(board.k-1,1,-1):
             cells_to_set = []
-            # Check horizontal for 2 in a row
+            # Check horizontal for check_for in a row
             for row in range(board.n):
                 for col in range(board.m - check_for + 1):
                     if all(board.array[row, col + i] == opponent for i in range(0, check_for)):
@@ -169,7 +176,7 @@ class Bot2(Player):
             
             
             
-            # Check vertical for 2 in a row
+            # Check vertical for check_for in a row
             for col in range(board.m):
                 for row in range(board.n - check_for + 1):
                     if all(board.array[row + i, col] ==  opponent for i in range(0, check_for)):
@@ -178,7 +185,7 @@ class Bot2(Player):
                             if [self.distance_to_edge(row + check_for, col, board),(row + check_for, col)] in empty_cells else None
             
             
-            # # Check diagonal for 2 in a row (left to right)
+            # # Check diagonal for check_for in a row (left to right)
             for row in range(board.n - check_for + 1):
                 for col in range(board.m - check_for + 1):
                     if all(board.array[row + i, col + i] ==  opponent for i in range(0, check_for)):
@@ -187,7 +194,7 @@ class Bot2(Player):
                             if [self.distance_to_edge(row + check_for, col + check_for, board),(row + check_for, col + check_for)] in empty_cells else None
             
             
-            # # Check diagonal for 2 in a row (right to left)
+            # # Check diagonal for check_for in a row (right to left)
             for row in range(board.n - check_for + 1):
                 for col in range(check_for - 1, board.m):
                     if all(board.array[row + i, col - i] ==  opponent for i in range(0, check_for)):
@@ -195,7 +202,7 @@ class Bot2(Player):
                         cells_to_set.append([self.distance_to_edge(row + check_for, col - check_for, board),(row + check_for, col - check_for)]) \
                             if [self.distance_to_edge(row + check_for, col - check_for, board),(row + check_for, col - check_for)] in empty_cells else None
             
-            
+            # if it has found a set of cells to set the bot will break the loop
             if len(cells_to_set) > 0:
                 break
           
@@ -219,10 +226,14 @@ class Bot2(Player):
 
     
     def find_empty_cells(self, board):
-        """function that locates the empty spots on the board
-
+        """
+        Finds and returns a list of empty cells in the given board.
+        
+        Parameters:
+            board (Board): The board object representing the game board.
+        
         Returns:
-            tuple: list with tuples of empty cells in the format (ring ,(n,m)) = (row, col)
+            empty_cells (list): A list of empty cells in the board, sorted in descending order of distance to the edge.
         """
         
         empty_cells = []
@@ -234,34 +245,7 @@ class Bot2(Player):
                     
         return empty_cells
     
-    
-    def cells_increase_probability(self, cells, board):
-        """function that takes all the free cells on the board and appends them min(row+1/col+1) times to the list.
-        This inceases the probability of the Bot placing a ring in the center of the field.
-
-        Args:
-            cells (list): free cells on the board
-
-        Returns:
-            list: list of free spots on the board. If the cell is closer to the middle of the board the cell will appear more
-            frequent
-        """
-        
-        cells_to_pick = []
-        for cell in cells:
-            row = min(min(cell[0], cell[1]), min(board.n-cell[0]-1, board.m-cell[1]-1))
-            if row == 0:
-                for _ in range(row+1):
-                    cells_to_pick.append(cell)
-            if row  == 1:
-               for _ in range(row+1):
-                    cells_to_pick.append(cell)
-            if row  > 1:
-               for _ in range(row+3):
-                    cells_to_pick.append(cell)
-        
-        return cells_to_pick
-        
+     
     def distance_to_edge(self, row, col, board):
         """function that calculates the distance to the edge of the board
 
@@ -497,11 +481,16 @@ class Bot3(Player):
 
     
     def find_empty_cells(self, board):
-        """function that locates the empty spots on the board
-
-        Returns:
-            tuple: list with tuples of empty cells in the format (ring ,(n,m)) = (row, col)
         """
+        Finds and returns a list of empty cells in the given board.
+        
+        Parameters:
+            board (Board): The board object representing the game board.
+        
+        Returns:
+            empty_cells (list): A list of empty cells in the board, sorted in descending order of distance to the edge.
+        """
+        
         
         empty_cells = []
         for col in range(board.m):
@@ -545,9 +534,17 @@ class Bot3(Player):
         return distance
         
     def shuffle_by_ring(self, cells: list, board: Board):
-        '''
-        Randomly shuffles the list of cells by ring, so that the bot sets in a random cell in the highest ring
-        '''
+        """
+        Shuffles the given cells by ring using the provided board.
+        
+        Args:
+            cells (list): A list of cells to be shuffled.
+            board (Board): The board object used to calculate the number of rings.
+        
+        Returns:
+            list: The shuffled cells by ring
+        """
+        
         shuffled_cells = []
         num_rings = self.calculate_number_of_rings(board)
         for i in range(num_rings,-1,-1):
