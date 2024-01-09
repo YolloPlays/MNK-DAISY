@@ -9,14 +9,31 @@ class Bot(Player):
 
     """
     def __init__(self, number):
+        """
+        Initialize the Bot as an instance of the Player Class
+
+        Parameters:
+            number (int): The player number of the bot.
+        """
         super().__init__("KI"+str(number), number)
 
     def make_move(self, board, m=None, n=None):
-        """_summary_
+        """
+        Generates the next move for the bot
+
+        Parameters:
+            board (Board): The current game board.
+            m (int, optional): Needed for compatibility.
+            n (int, optional): Needed for compatibility.
 
         Returns:
-            Tuple: (m,n)
+            tuple: A tuple representing the row and column indices of the move to be made.
+
+        This function generates a move for the current player by selecting a random empty cell on the board. 
+        It first finds all the empty cells on the board and then randomly selects one of them. 
+        The coordinates of the selected cell are returned as a tuple (n, m).
         """
+        
         empty_cells = []
         for col in range(board.m):
             for row in range(board.n):
@@ -33,9 +50,30 @@ class Bot1(Player):
 
     """
     def __init__(self, number):
+        """
+        Initialize the Bot as an instance of the Player Class
+
+        Parameters:
+            number (int): The player number of the bot.
+        """
         super().__init__("KI"+str(number), number)
 
     def make_move(self, board, m=None, n=None):
+        """
+        Generates the next move for the bot
+
+        Parameters:
+            board (Board): The current game board.
+            m (int, optional): Needed for compatibility.
+            n (int, optional): Needed for compatibility.
+
+        Returns:
+            tuple: A tuple representing the row and column indices of the move to be made.
+            
+        This function generates a move for the current player by checking if the opponent has 2 or more in a row, col or diag.
+        If the opponent has 2 or more in a row, col or diag, the function will return will return all the coordinates of an empty cell to block the opponent.
+        If the opponent does not have 2 or more in a row, col or diag, the function will return a random move on an empty cell.
+        """
         # Check on board if human player has 2 or more in a row, col oder diag
         
         # Check empty cells on board
@@ -92,9 +130,27 @@ class Bot2(Player):
     Blocker Bot with new features. 
     """
     def __init__(self, number):
+        """
+        Initialize the Bot as an instance of the Player Class
+
+        Parameters:
+            number (int): The player number of the bot.
+        """
         super().__init__("KI"+str(number), number)
 
     def make_move(self, board, m=None, n=None):
+        """
+        Find the best move for the bot player on the given board.
+
+        Parameters:
+            board (Board): The current game board.
+            m (int, optional): Needed for compatibility.
+            n (int, optional): Needed for compatibility.
+
+        Returns:
+            tuple: The row and column numbers of the best move.
+        """
+        
         # Check on board if human player has 2 or more in a row, col oder diag
         # Check empty cells on board
         empty_cells = self.find_empty_cells(board)
@@ -143,11 +199,7 @@ class Bot2(Player):
             if len(cells_to_set) > 0:
                 break
           
-            
-            
-            
-            
-
+    
         #print(set_list)
         cells_to_set.sort(reverse= True) if len(cells_to_set) > 0 else None
         #cells_to_set.reverse() if len(cells_to_set) > 0 else None
