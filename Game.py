@@ -6,6 +6,11 @@ import random as rr
 
 class Game:
     def __init__(self, board:Board, player1:Player, player2:Player  = Bot(2), **kwargs) -> None:
+        """
+        Initializes the game with the given board, player1, and player2. Optional
+        shuffle parameter shuffles the starting player. Other optional parameters 
+        include should_log, repeat, and should_print. 
+        """
         self.board = board
         self.player1 = player1
         self.player2 = player2

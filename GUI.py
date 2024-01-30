@@ -85,7 +85,7 @@ class GUI:
         
     def delete_rows(self):
         """
-        Deletes all the rows in the game canvas by removing the "row" items.
+        Deletes all the rows in the game canvas.
         Returns:
             None
         """
