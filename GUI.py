@@ -163,15 +163,19 @@ class GUI:
                     self.move_blocked = True
                     self.draw_chip(results)
                     self.root.after(200, self.toggle_block)
-                    if winner:=self.game.board.has_won():
-                        self.root.after(1200, self.display_win, winner-1) # winner-1 is basically is_red?
-                    elif self.game.board.is_draw():
+                    self.handle_win(self.game.board.has_won())
+                    if self.game.board.is_draw():
                         self.display_draw()
                     elif self.game.is_bot():
                         self.root.after(600, self.draw_chip, self.game.game_move(0,0))
                         self.root.after(601, self.handle_draw, self.game.board.is_draw())
+                        self.root.after(601, self.handle_win, self.game.board.has_won())
                         # self.draw_chip(self.game.game_move(0,0)) #DEBUG: Without delay
                         # self.handle_draw(self.game.board.is_draw())
+    def handle_win(self, winner):
+        if winner:
+            self.root.after(1200, self.display_win, winner-1) # winner-1 is basically is_red?
+    
     def handle_draw(self, is_draw):
         """
         If the game is a draw, display the draw screen. 
@@ -496,8 +500,8 @@ class GUI:
         Parameters:
             event (tk.Event): The event that triggered the function.
         """
-        modes = {"1-0": Bot(1),"1-1": Bot1(1), "1-2": Bot2(1), "1-3": Bot2(1), "1-4": Bot2(1), "1-5": Player("<p1>", 1),
-                 "2-0": Bot(2),"2-1": Bot1(2), "2-2": Bot2(2), "2-3": Bot2(2), "2-4": Bot2(2), "2-5": Player("<p2>", 2)}
+        modes = {"1-0": Bot0(1),"1-1": Bot1(1), "1-2": Bot2(1), "1-3": Bot3(1), "1-4": Bot0(1), "1-5": Player("<p1>", 1),
+                 "2-0": Bot0(2),"2-1": Bot1(2), "2-2": Bot2(2), "2-3": Bot3(2), "2-4": Bot0(2), "2-5": Player("<p2>", 2)}
         if event.widget._name[0] == "1":
             self.player1 = modes[event.widget._name]
         elif event.widget._name[0] == "2":
@@ -620,5 +624,5 @@ class GUI:
         print(lsst)
         
         
-if __name__ == "__main__":
+if __name__ == "__main__":    
     GUI()
