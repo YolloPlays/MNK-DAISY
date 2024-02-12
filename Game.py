@@ -1,11 +1,11 @@
 from Board import Board
 from Player import Player
 from MyBot import *
-from MyAi import BotAI
 import random as rr
+import os
 
 class Game:
-    def __init__(self, board:Board, player1:Player, player2:Player  = Bot(2), **kwargs) -> None:
+    def __init__(self, board:Board, player1:Player, player2:Player  = Bot0(2), **kwargs) -> None:
         self.board = board
         self.player1 = player1
         self.player2 = player2
@@ -18,12 +18,13 @@ class Game:
         self.repeat = a if (a:=kwargs.get("repeat")) else 1
         self.should_print = kwargs.get("should_print") if kwargs.get("should_print") != None else True
         if self.should_log:
+            log_path = os.path.join(os.getcwd(), "Logs")
             try:
-                with open("log.csv", "x") as f:
+                with open(os.path.join(log_path, f"log_{str(player1)[7:11]}_{str(player2)[7:11]}.csv"), "x") as f:
                     f.write("starting player,winning number\n")
             except Exception:
                 print("File already created, beginning to append")
-            self.f = open("log.csv", "a")
+            self.f = open(os.path.join(log_path, f"log_{str(player1)[7:11]}_{str(player2)[7:11]}.csv"), "a")
         
     def game_move(self, m, n):
         # TODO handle real play and player change handle win check
@@ -70,12 +71,14 @@ class Game:
                 self.starting_player = bool(rr.getrandbits(1))
                 self.playerturn = self.starting_player
             print("\n\n\n\n\n") if self.should_print else None
-        print(i) # <= Debug
+        #print(i) # <= Debug
     
     def log(self, string):
         if self.should_log:
             self.f.write(f"{string}\n")
         
 if __name__ == "__main__":
-    game = Game(Board(), Bot(1), Bot(2), should_log=True, repeat=10000, shuffle=True, should_print=False)
+    from MyAi import BotAI
+    board = Board(5, 5, 4)
+    game = Game(board, Bot0(1), Bot0(2), should_log=True, repeat=1000, shuffle=True, should_print=False)
     game.start()
