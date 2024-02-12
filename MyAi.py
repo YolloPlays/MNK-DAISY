@@ -1,8 +1,8 @@
-from MyBot import Bot
+from MyBot import Bot0
 import pickle as pl
 import pandas as pd
 
-class BotAI(Bot):
+class BotAI(Bot0):
     def __init__(self, number):
         super().__init__(number)
         self.ai = pl.load(open("model5x5.pkl", "rb"))
