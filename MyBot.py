@@ -390,39 +390,27 @@ class Bot3(Player):
         #####################################################################
         
         if not cells_to_set: # empty list
-            # cells to set represents the cells that the bot hat determined to be valid for the next (good) move
-            cells_to_set_vert, cells_to_set_hor, cells_to_set_diag_l_r, cells_to_set_diag_r_l = [], [], [], []
-            
-            #cells_to_set = []
-            self._check_sequence(board, 2, opponent, empty_board_cells, cells_to_set_vert, 1, 0)
-            self._check_sequence(board, 2, opponent, empty_board_cells, cells_to_set_hor, 0, 1)
-            self._check_sequence(board, 2, opponent, empty_board_cells, cells_to_set_diag_l_r, 1, 1)
-            self._check_sequence(board, 2, opponent, empty_board_cells, cells_to_set_diag_r_l, -1, 1)
-            
-            rows, cols, diags_l_r, diags_r_l = self._find_rows_for_k(empty_board_cells, opponent, board)
-            
-            
-            # clean up cells_to_set, so that only the rows that are dagerous are left
-            
-            cells_to_set_hor, cells_to_set_vert, cells_to_set_diag_l_r, cells_to_set_diag_r_l = self._filter_cells(cells_to_set_hor, cells_to_set_vert, cells_to_set_diag_l_r, cells_to_set_diag_r_l, rows, cols, diags_l_r, diags_r_l)
-            
-            # for ring, cell in cells_to_set_hor:
-            #     if cell[0] not in rows:
-            #         cells_to_set_hor.remove((ring,cell))
-                    
-            # for ring, cell in cells_to_set_vert:
-            #     if cell[1] not in cols:
-            #         cells_to_set_vert.remove((ring, cell))
-        
-            # for ring, cell in cells_to_set_diag_l_r:
-            #     if cell not in diags_l_r:
-            #         cells_to_set_diag_l_r.remove((ring, cell))
-            
-            # for ring, cell in cells_to_set_diag_r_l:
-            #     if cell not in diags_r_l:
-            #         cells_to_set_diag_r_l.remove((ring,cell))
-                    
-            cells_to_set = list(set(cells_to_set_vert + cells_to_set_hor + cells_to_set_diag_l_r + cells_to_set_diag_r_l))
+            for check_for in range(3, 1, -1):
+                # cells to set represents the cells that the bot hat determined to be valid for the next (good) move
+                cells_to_set_vert, cells_to_set_hor, cells_to_set_diag_l_r, cells_to_set_diag_r_l = [], [], [], []
+                
+                #cells_to_set = []
+                self._check_sequence(board, check_for, opponent, empty_board_cells, cells_to_set_vert, 1, 0)
+                self._check_sequence(board, check_for, opponent, empty_board_cells, cells_to_set_hor, 0, 1)
+                self._check_sequence(board, check_for, opponent, empty_board_cells, cells_to_set_diag_l_r, 1, 1)
+                self._check_sequence(board, check_for, opponent, empty_board_cells, cells_to_set_diag_r_l, -1, 1)
+                
+                rows, cols, diags_l_r, diags_r_l = self._find_rows_for_k(empty_board_cells, opponent, board)
+                
+                
+                # clean up cells_to_set, so that only the rows that are dangerous are left
+                
+                cells_to_set_hor, cells_to_set_vert, cells_to_set_diag_l_r, cells_to_set_diag_r_l = self._filter_cells(cells_to_set_hor, cells_to_set_vert, cells_to_set_diag_l_r, cells_to_set_diag_r_l, rows, cols, diags_l_r, diags_r_l)
+                        
+                cells_to_set = list(set(cells_to_set_vert + cells_to_set_hor + cells_to_set_diag_l_r + cells_to_set_diag_r_l))
+                
+                if cells_to_set: # if cells to set is populated, then break. Found the sequence with the greatest length
+                    break
         
         
         #####################################################################
@@ -445,23 +433,6 @@ class Bot3(Player):
                 # clean up cells_to_set, so that only the rows that are dagerous are left
                 
                 cells_to_set_hor, cells_to_set_vert, cells_to_set_diag_l_r, cells_to_set_diag_r_l = self._filter_cells(cells_to_set_hor, cells_to_set_vert, cells_to_set_diag_l_r, cells_to_set_diag_r_l, rows, cols, diags_l_r, diags_r_l)
-                
-                
-                # for ring, cell in cells_to_set_hor:
-                #     if cell[0] not in rows:
-                #         cells_to_set_hor.remove((ring,cell))
-                        
-                # for ring, cell in cells_to_set_vert:
-                #     if cell[1] not in cols:
-                #         cells_to_set_vert.remove((ring, cell))
-            
-                # for ring, cell in cells_to_set_diag_l_r:
-                #     if cell not in diags_l_r:
-                #         cells_to_set_diag_l_r.remove((ring, cell))
-                
-                # for ring, cell in cells_to_set_diag_r_l:
-                #     if cell not in diags_r_l:
-                #         cells_to_set_diag_r_l.remove((ring,cell))
                         
                 cells_to_set = list(set(cells_to_set_vert + cells_to_set_hor + cells_to_set_diag_l_r + cells_to_set_diag_r_l))
                 
@@ -477,7 +448,6 @@ class Bot3(Player):
         # should_add_ring is set to True because all the empty cells are shuffled by ring later. Adding the ring for the empty cells in the _check_sequence method 
         # is not necessary and would make the code less readable
         
-        #print(cells_to_set) 
         
         if not cells_to_set:
             cells_to_set = self._find_empty_cells(board, should_add_ring = True)
