@@ -6,6 +6,18 @@ class Player():
 
     
     def make_move(self, board, m = None, n = None):
+        """
+        A function to prompt the player to make a move on the board and update the board accordingly.
+
+        Parameters:
+            self: The object instance
+            board: The game board
+            m: The column index, default is None (needed for compatibility)
+            n: The row index, default is None (needed for compatibility)
+
+        Returns:
+            A tuple representing the coordinates of the move (m, n)
+        """
         while True:
             n = (int(input(f"{self.name}, bitte geben Sie die Zeile an: ")) - 1) \
                 if n is None else n
