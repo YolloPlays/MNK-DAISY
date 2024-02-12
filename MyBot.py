@@ -2,8 +2,10 @@ from random import choice, shuffle
 from itertools import combinations
 from Player import Player
 from Board import Board
+import numpy as np
+from scipy.signal import convolve
 
-class Bot(Player):
+class Bot0(Player):
     """
     Random Bot. Places randomly on free cells
 
@@ -34,14 +36,12 @@ class Bot(Player):
         The coordinates of the selected cell are returned as a tuple (n, m).
         """
         
-        empty_cells = []
-        for col in range(board.m):
-            for row in range(board.n):
-                empty_cells.append((row,col)) if board.array[row, col] == 0 else None
+        empty_board_cells = list(zip(*np.where(board.array == 0)))
         
         # Randomly select a cell to place the disc
-        n, m = choice(empty_cells)
+        n, m = choice(empty_board_cells)
         return super().make_move(board, m, n)
+
 
 
 class Bot1(Player):
@@ -57,6 +57,7 @@ class Bot1(Player):
             number (int): The player number of the bot.
         """
         super().__init__("KI"+str(number), number)
+
 
     def make_move(self, board, m=None, n=None):
         """
@@ -74,55 +75,74 @@ class Bot1(Player):
         If the opponent has 2 or more in a row, col or diag, the function will return will return all the coordinates of an empty cell to block the opponent.
         If the opponent does not have 2 or more in a row, col or diag, the function will return a random move on an empty cell.
         """
+        
+        # get all empty cells on the board
+        empty_board_cells = list(zip(*np.where(board.array == 0)))
+                
+        # get the opponent number
+        opponent = 1 if self.player_number == 2 else 2
+        
         # Check on board if human player has 2 or more in a row, col oder diag
-        
-        # Check empty cells on board
-        empty_cells = []
-        for col in range(board.m):
-            for row in range(board.n):
-                empty_cells.append((row,col)) if board.array[row, col] == 0 else None
-
-        
-        check_for = 2
         cells_to_set = []
-        
-        # Check horizontal for 2 in a row
-        for row in range(board.n):
-            for col in range(board.m - check_for+1):
-                if all(board.array[row, col + i] ==  1 for i in range(0, check_for)):
-                    cells_to_set.append((row, col-1)) if (row, col-1) in empty_cells else None
-                    cells_to_set.append((row, col+check_for)) if (row, col+check_for) in empty_cells else None
-        
-        
-        # Check vertical for 2 in a row
-        for col in range(board.m):
-            for row in range(board.n - check_for + 1):
-                if all(board.array[row + i, col] ==  1 for i in range(0, check_for)):
-                    cells_to_set.append((row-1, col)) if (row-1, col) in empty_cells else None
-                    cells_to_set.append((row+check_for, col)) if (row+check_for, col) in empty_cells else None
-        
-        
-        # # Check diagonal for 2 in a row
-        for row in range(board.n - check_for + 1):
-            for col in range(board.m - check_for + 1):
-                if all(board.array[row + i, col + i] ==  1 for i in range(0, check_for)):
-                    cells_to_set.append((row-1, col-1)) if (row-1, col-1) in empty_cells else None
-                    cells_to_set.append((row+check_for, col+check_for)) if (row+check_for, col+check_for) in empty_cells else None
-        
-
-        for row in range(board.n - check_for + 1):
-            for col in range(check_for - 1, board.m):
-                if all(board.array[row + i, col - i] ==  1 for i in range(0, check_for)):
-                    cells_to_set.append((row-1, col+1)) if (row-1, col+1) in empty_cells else None
-                    cells_to_set.append((row+check_for, col-check_for)) if (row+check_for, col-check_for) in empty_cells else None
-        
-        if len(cells_to_set) == 0:
-            cells_to_set = empty_cells       
+        for check_for in range(board.k-1,1,-1):
+            # check horizontal 
+            self._check_sequence(board, check_for, opponent, empty_board_cells, cells_to_set, 0, 1)
+            # check vertical
+            self._check_sequence(board, check_for, opponent, empty_board_cells, cells_to_set, 1, 0)
+            # check main diagonal
+            self._check_sequence(board, check_for, opponent, empty_board_cells, cells_to_set, 1, 1)
+            # check anti diagonal
+            self._check_sequence(board, check_for, opponent, empty_board_cells, cells_to_set, -1, 1)
             
-        # Randomly select a cell to place the disc from all cells or just cells nearby opponent
-        n,m = choice(cells_to_set)
-        # print(f'Spalte {m+1} , Zeile {n+1}')
+            
+            # if cells_to_set is not empty, break the loop
+            if cells_to_set:
+                break
+        
+        
+        # if no cells were found to block the opponent, use all empty cells
+        if not cells_to_set:
+            cells_to_set = empty_board_cells       
+            
+        # Randomly select a cell to place the disc from all empty cells or just cells next to opponent
+        n, m = choice(cells_to_set)
+        
         return super().make_move(board, m, n)
+    
+    
+    def _check_sequence(self, board: Board, check_for: int, player_number: int, empty_cells: list, cells_to_set: list, delta_row: int, delta_col: int):
+        """
+        Check if a sequence of consecutive cells is present on the board. If so add the previous 
+        and next cells to the list of cells to set if they are empty.
+        
+        Parameters:
+            board (Board): The game board.
+            check_for (int): The number of consecutive cells to check for.
+            player_number (int): The player number to check for.
+            empty_cells (list): List of empty cells on the board.
+            cells_to_set (list): List of cells to set for the bot.
+            delta_row (int): The change in row direction to calculate the next or previous cell.
+            delta_col (int): The change in column direction to calculate the next or previous cell.
+            
+        """
+            
+        for row in range(board.n - (check_for - 1) * delta_row):
+            for col in range(board.m - (check_for - 1) * delta_col):
+                # no other possibility was found besides continuing if the row is out of bounds, because the code wont run as intended otherwise
+                if row >= board.n:
+                    continue
+                if all(board.array[row + i * delta_row, col + i * delta_col] == player_number for i in range(check_for)):
+                    # calculate the previous and next cell
+                    prev_cell = (row - delta_row, col - delta_col)
+                    next_cell = (row + check_for * delta_row, col + check_for * delta_col)
+                    
+                    # check if prev cell to found series is empty and not already in the list of cells to set
+                    if prev_cell in empty_cells and prev_cell not in cells_to_set:
+                        cells_to_set.append(prev_cell)
+                    # check if next cell to found series is empty and not already in the list of cells to set
+                    if next_cell in empty_cells and next_cell not in cells_to_set:
+                        cells_to_set.append(next_cell)
+
 
 
 class Bot2(Player):
@@ -137,6 +157,7 @@ class Bot2(Player):
             number (int): The player number of the bot.
         """
         super().__init__("KI"+str(number), number)
+
 
     def make_move(self, board, m=None, n=None):
         """
@@ -160,405 +181,135 @@ class Bot2(Player):
         
         # Check on board if human player has 2 or more in a row, col oder diag
         # Check empty cells on board
-        empty_cells = self.find_empty_cells(board)
+        empty_board_cells = self._find_empty_cells(board, should_add_ring = False)
+       
         opponent = 1 if self.player_number == 2 else 2
-    
         
-        for check_for in range(board.k-1,1,-1):
-            cells_to_set = []
-            # Check horizontal for check_for in a row
-            for row in range(board.n):
-                for col in range(board.m - check_for + 1):
-                    if all(board.array[row, col + i] == opponent for i in range(0, check_for)):
-                        cells_to_set.append([self.distance_to_edge(row, col-1, board),(row, col-1)]) if [self.distance_to_edge(row, col-1, board),(row, col-1)] in empty_cells else None
-                        cells_to_set.append([self.distance_to_edge(row, col + check_for, board),(row, col + check_for)]) \
-                            if [self.distance_to_edge(row, col + check_for, board),(row, col + check_for)] in empty_cells else None
+        # cells to set represents the cells where the bot will place its disc
+        cells_to_set = []
+        
+        # check if there is the need to block the opponent because it has at least k-2 in a row
+        for check_for in range(board.k-1,board.k-2-1,-1):
+            # check horizontal 
+            self._check_sequence(board, check_for, opponent, empty_board_cells, cells_to_set, 0, 1)
+            # check vertical
+            self._check_sequence(board, check_for, opponent, empty_board_cells, cells_to_set, 1, 0)
+            # check main diagonal
+            self._check_sequence(board, check_for, opponent, empty_board_cells, cells_to_set, 1, 1)
+            # check anti diagonal
+            self._check_sequence(board, check_for, opponent, empty_board_cells, cells_to_set, -1, 1)
             
-            
-            
-            # Check vertical for check_for in a row
-            for col in range(board.m):
-                for row in range(board.n - check_for + 1):
-                    if all(board.array[row + i, col] ==  opponent for i in range(0, check_for)):
-                        cells_to_set.append([self.distance_to_edge(row - 1, col, board),(row - 1, col)]) if [self.distance_to_edge(row - 1, col, board),(row - 1, col)] in empty_cells else None
-                        cells_to_set.append([self.distance_to_edge(row + check_for, col, board),(row + check_for, col)]) \
-                            if [self.distance_to_edge(row + check_for, col, board),(row + check_for, col)] in empty_cells else None
-            
-            
-            # # Check diagonal for check_for in a row (left to right)
-            for row in range(board.n - check_for + 1):
-                for col in range(board.m - check_for + 1):
-                    if all(board.array[row + i, col + i] ==  opponent for i in range(0, check_for)):
-                        cells_to_set.append([self.distance_to_edge(row - 1, col -1, board),(row - 1, col -1 )]) if [self.distance_to_edge(row - 1, col -1, board),(row - 1, col -1)] in empty_cells else None
-                        cells_to_set.append([self.distance_to_edge(row + check_for, col + check_for, board),(row + check_for, col + check_for)]) \
-                            if [self.distance_to_edge(row + check_for, col + check_for, board),(row + check_for, col + check_for)] in empty_cells else None
-            
-            
-            # # Check diagonal for check_for in a row (right to left)
-            for row in range(board.n - check_for + 1):
-                for col in range(check_for - 1, board.m):
-                    if all(board.array[row + i, col - i] ==  opponent for i in range(0, check_for)):
-                        cells_to_set.append([self.distance_to_edge(row - 1, col +1, board),(row - 1, col +1 )]) if [self.distance_to_edge(row - 1, col +1, board),(row - 1, col +1)] in empty_cells else None
-                        cells_to_set.append([self.distance_to_edge(row + check_for, col - check_for, board),(row + check_for, col - check_for)]) \
-                            if [self.distance_to_edge(row + check_for, col - check_for, board),(row + check_for, col - check_for)] in empty_cells else None
-            
-            # if it has found a set of cells to set the bot will break the loop
+            # as soon as a cell is found, break. No need to check further because the sequence with the largest number of cells has been found
             if len(cells_to_set) > 0:
                 break
-          
-    
-        #print(set_list)
-        cells_to_set.sort(reverse= True) if len(cells_to_set) > 0 else None
-        #cells_to_set.reverse() if len(cells_to_set) > 0 else None
-        
-        print(cells_to_set)
-        
-        # If set_list is empty the Bot chooses from all empty cells, but from the list with a higher probability
-        # for the middle cells
-        if len(cells_to_set) == 0:
-            cells_to_set = empty_cells
         
         
-        # Choose row and col from the first entry of cells_to_set
+        # sort the list of cells to set in descending order of distance to the edge
+        cells_to_set.sort(reverse = True) if len(cells_to_set) > 0 else None
+        
+        # if no cells were found where the bot can block the opponent set in one of the empty cells
+        # should_add_ring is set to True because all the empty cells are shuffled by ring later. Adding the ring for the empty cells in the _check_sequence method 
+        # is not necessary and would make the code less readable
+        
+        if not cells_to_set:
+            cells_to_set = self._find_empty_cells(board, should_add_ring = True)
+        
+        # shuffle the list of cells to set by ring. The list stays sorted by distance to the edge in descending order.
+        cells_to_set = self._shuffle_by_ring(cells_to_set, board)
+            
+        # Choose row and col from the first entry of cells_to_set. Index 1 is the tuple containing the row and col.
         n, m = cells_to_set[0][1]
-        #print(f'Spalte {m+1} , Zeile {n+1}')
+        
         return super().make_move(board, m, n)
 
+
+    def _check_sequence(self, board: Board, check_for: int, player_number: int, empty_cells: list, cells_to_set: list, delta_row: int, delta_col: int):
+            """
+            Check if a sequence of consecutive cells is present on the board. If so add the previous 
+            and next cells to the list of cells to set if they are empty.
+            
+            Parameters:
+                board (Board): The game board.
+                check_for (int): The number of consecutive cells to check for.
+                player_number (int): The player number to check for.
+                empty_cells (list): List of empty cells on the board.
+                cells_to_set (list): List of cells to set for the bot.
+                delta_row (int): The change in row direction to calculate the next or previous cell.
+                delta_col (int): The change in column direction to calculate the next or previous cell.
+                
+            """
+            
+            for row in range(board.n - (check_for - 1) * delta_row):
+                for col in range(board.m - (check_for - 1) * delta_col):
+                    # no other possibility was found besides continuing if the row is out of bounds, because the code wont run as intended otherwise
+                    if row >= board.n:
+                        continue
+                    if all(board.array[row + i * delta_row, col + i * delta_col] == player_number for i in range(check_for)):
+                        # calculate the previous and next cell
+                        prev_cell = (row - delta_row, col - delta_col)
+                        next_cell = (row + check_for * delta_row, col + check_for * delta_col)
+                      
+                        # check if prev cell to found series is empty. The map function is used to extract the tuple which contains the cell from the cells_to_set
+                        if prev_cell in empty_cells and prev_cell not in list(map(lambda x: x[1], cells_to_set)):
+                            cells_to_set.append((self._distance_to_edge(*prev_cell, board), prev_cell))
+                        # check if next cell to found series is empty. The map function is used to extract the tuple which contains the cell from the cells_to_set
+                        if next_cell in empty_cells and next_cell not in list(map(lambda x: x[1], cells_to_set)):
+                            cells_to_set.append((self._distance_to_edge(*next_cell, board), next_cell))
     
-    def find_empty_cells(self, board):
+
+    
+    def _find_empty_cells(self, board: Board, **kwargs) -> list:
         """
-        Finds and returns a list of empty cells in the given board.
-        
+        Finds and returns a list of empty cells in the given board, sorted in descending order of distance to the edge.
+
         Parameters:
-            board (Board): The board object representing the game board.
-        
+            board (Board): The board object representing the game board in the current state.
+            **kwargs: Additional keyword arguments.
+                should_add_ring (bool): Whether to add a ring to the list of empty cells. Default is False.
+
         Returns:
             empty_cells (list): A list of empty cells in the board, sorted in descending order of distance to the edge.
         """
+
+        should_add_ring = kwargs.get("should_add_ring") if kwargs.get("should_add_ring") != None else False
         
-        empty_cells = []
-        for col in range(board.m):
-                for row in range(board.n):
-                    empty_cells.append([self.distance_to_edge(row, col, board),(row, col)]) if board.array[row, col] == 0 else None
-                empty_cells.sort()
-                empty_cells.reverse()
-                    
-        return empty_cells
-    
+        empty_cells = list(zip(*np.where(board.array == 0)))
+
+        # make a list of tuples (distance, (row, col))
+        ring_coords = [(self._distance_to_edge(row, col, board), (row, col)) for row, col in empty_cells]
+
+        # sort the list in descending order of distance to edge
+        ring_coords.sort(reverse=True)
+
+        # keep the ring if should_add_ring is True: (distance, (row, col)) else remove the ring: (row, col)
+        if should_add_ring:
+            empty_cells_sorted = ring_coords
+        else:
+            # extract the coordinates from the sorted tuples
+            empty_cells_sorted = [coords for _, coords in ring_coords]
+        
+
+        return empty_cells_sorted
+
      
-    def distance_to_edge(self, row, col, board):
+    def _distance_to_edge(self, row, col, board):
         """function that calculates the distance to the edge of the board
 
-        Args:
-            row (int): row on board
-            col (int): col on board
-            board (Board): board object
-
-        Returns:
-            int: _distance_ to the edge of the board
-            
-        """
-        distance = min(min(row, col), min(board.n-row-1, board.m-col-1))
-        
-        return distance
-        
-
-class Bot3(Player):
-    """
-    Blocker Bot with new features. Also able to play offensive
-    """
-    def __init__(self, number):
-        super().__init__("KI"+str(number), number)
-
-    def make_move(self, board, m=None, n=None):
-        # Check on board if human player has 2 or more in a row, col oder diag
-        # Check empty cells on board
-        empty_cells = self.find_empty_cells(board)
-        opponent = 1 if self.player_number == 2 else 2
-
-        # check how many cells the bot has on the board
-        cells_to_test = []
-        bot_cells = self.find_bot_cells(board)
-        #print(bot_cells, '\n')
-        
-        # bot_in_row = 1
-        # for i in range(board.k-1,1,-1):
-        #     if bot_in_row > 1:
-        #         break
-        #     combinations_list = list(combinations(bot_cells, i))
-        #     for combination in combinations_list:
-                
-        #         combination = sorted(combination, key=lambda x: x[1][1])
-                
-        #         if all(((combination[k][1][1])+k) == combination[0][1][1] and combination[0][1][0] == combination[k][1][0] for k in range(1,len(combination))):
-        #             print('found', combination)
-        #             bot_in_row = i
-                
-        #         if bot_in_row > 1:
-        #             break
-                
-        #         combination = sorted(combination, key=lambda x: x[1][0])
-                
-        #         if all(((combination[k][1][0])+k) == combination[0][1][0] and combination[0][1][1] == combination[k][1][1] for k in range(1,len(combination))):
-        #             print('found', combination)
-        #             bot_in_row = i
-                
-        #         if bot_in_row > 1:
-        #             break
-                
-        #         combination = sorted(combination, key=lambda x: (x[1][0],x[1][1]), reverse=True)
-        #         print(combination)
-        #         print('bird')
-                
-        #         if all((combination[0][1][1] == (combination[k][1][1])+k) for k in range(1,len(combination))):
-        #             print('found', combination)
-        #             bot_in_row = i
-
-                    
-                    
-        
-        # print('bot in row', bot_in_row)
-        
-        
-
-        
-        
-        # self. check how many cells the bot has in a row
-        
-        for check_for in range(board.k-1,board.k-2,-1):
-            cells_to_set = []
-            # Check horizontal for board.k-1 in a row
-            for row in range(board.n):
-                for col in range(board.m - check_for + 1):
-                    if all(board.array[row, col + i] == self.player_number for i in range(0, check_for)):
-                        cells_to_set.append([self.distance_to_edge(row, col-1, board),(row, col-1)]) if [self.distance_to_edge(row, col-1, board),(row, col-1)] in empty_cells else None
-                        cells_to_set.append([self.distance_to_edge(row, col + check_for, board),(row, col + check_for)]) \
-                            if [self.distance_to_edge(row, col + check_for, board),(row, col + check_for)] in empty_cells else None
-
-            
-            # Check vertical for board.k-1 in a row
-                for col in range(board.m):
-                    for row in range(board.n - check_for + 1):
-                        if all(board.array[row + i, col] ==  opponent for i in range(0, check_for)):
-                            cells_to_set.append([self.distance_to_edge(row - 1, col, board),(row - 1, col)]) if [self.distance_to_edge(row - 1, col, board),(row - 1, col)] in empty_cells else None
-                            cells_to_set.append([self.distance_to_edge(row + check_for, col, board),(row + check_for, col)]) \
-                                if [self.distance_to_edge(row + check_for, col, board),(row + check_for, col)] in empty_cells else None
-                
-                
-                # # Check diagonal for board.k-1 in a row (left to right)
-                for row in range(board.n - check_for + 1):
-                    for col in range(board.m - check_for + 1):
-                        if all(board.array[row + i, col + i] ==  opponent for i in range(0, check_for)):
-                            cells_to_set.append([self.distance_to_edge(row - 1, col -1, board),(row - 1, col -1 )]) if [self.distance_to_edge(row - 1, col -1, board),(row - 1, col -1)] in empty_cells else None
-                            cells_to_set.append([self.distance_to_edge(row + check_for, col + check_for, board),(row + check_for, col + check_for)]) \
-                                if [self.distance_to_edge(row + check_for, col + check_for, board),(row + check_for, col + check_for)] in empty_cells else None
-                
-                
-                # # Check diagonal for board.k-1 in a row (right to left)
-                for row in range(board.n - check_for + 1):
-                    for col in range(check_for - 1, board.m):
-                        if all(board.array[row + i, col - i] ==  opponent for i in range(0, check_for)):
-                            cells_to_set.append([self.distance_to_edge(row - 1, col +1, board),(row - 1, col +1 )]) if [self.distance_to_edge(row - 1, col +1, board),(row - 1, col +1)] in empty_cells else None
-                            cells_to_set.append([self.distance_to_edge(row + check_for, col - check_for, board),(row + check_for, col - check_for)]) \
-                                if [self.distance_to_edge(row + check_for, col - check_for, board),(row + check_for, col - check_for)] in empty_cells else None
-                
-                
-                
-            #print('bot has k-1 in a row and can set in following cells to win',cells_to_set)
-                
-            # if len(cells_to_set) > 0:
-            #     break
-                
-
-        # if bot has less than k-1 in a row so bot will check if it is possible to block the opponent
-        
-        if len(cells_to_set) == 0:
-            for check_for in range(board.k-1,board.k-2-1,-1):
-                cells_to_set = []
-                # Check horizontal for board.k-1 
-                for row in range(board.n):
-                    for col in range(board.m - check_for + 1):
-                        if all(board.array[row, col + i] == opponent for i in range(0, check_for)):
-                            cells_to_set.append([self.distance_to_edge(row, col-1, board),(row, col-1)]) if [self.distance_to_edge(row, col-1, board),(row, col-1)] in empty_cells else None
-                            cells_to_set.append([self.distance_to_edge(row, col + check_for, board),(row, col + check_for)]) \
-                                if [self.distance_to_edge(row, col + check_for, board),(row, col + check_for)] in empty_cells else None
-                
-                
-                
-                # Check vertical for 2 in a row
-                for col in range(board.m):
-                    for row in range(board.n - check_for + 1):
-                        if all(board.array[row + i, col] ==  opponent for i in range(0, check_for)):
-                            cells_to_set.append([self.distance_to_edge(row - 1, col, board),(row - 1, col)]) if [self.distance_to_edge(row - 1, col, board),(row - 1, col)] in empty_cells else None
-                            cells_to_set.append([self.distance_to_edge(row + check_for, col, board),(row + check_for, col)]) \
-                                if [self.distance_to_edge(row + check_for, col, board),(row + check_for, col)] in empty_cells else None
-                
-                
-                # # Check diagonal for 2 in a row (left to right)
-                for row in range(board.n - check_for + 1):
-                    for col in range(board.m - check_for + 1):
-                        if all(board.array[row + i, col + i] ==  opponent for i in range(0, check_for)):
-                            cells_to_set.append([self.distance_to_edge(row - 1, col -1, board),(row - 1, col -1 )]) if [self.distance_to_edge(row - 1, col -1, board),(row - 1, col -1)] in empty_cells else None
-                            cells_to_set.append([self.distance_to_edge(row + check_for, col + check_for, board),(row + check_for, col + check_for)]) \
-                                if [self.distance_to_edge(row + check_for, col + check_for, board),(row + check_for, col + check_for)] in empty_cells else None
-                
-                
-                # # Check diagonal for 2 in a row (right to left)
-                for row in range(board.n - check_for + 1):
-                    for col in range(check_for - 1, board.m):
-                        if all(board.array[row + i, col - i] ==  opponent for i in range(0, check_for)):
-                            cells_to_set.append([self.distance_to_edge(row - 1, col +1, board),(row - 1, col +1 )]) if [self.distance_to_edge(row - 1, col +1, board),(row - 1, col +1)] in empty_cells else None
-                            cells_to_set.append([self.distance_to_edge(row + check_for, col - check_for, board),(row + check_for, col - check_for)]) \
-                                if [self.distance_to_edge(row + check_for, col - check_for, board),(row + check_for, col - check_for)] in empty_cells else None
-                
-                if len(cells_to_set) > 0:
-                    break
-        
-        
-        # Make Bot be offensive if there is nothing to block. Bot should look in empty cells, if there is a possiblity to get k in a row
-        # Check horizontal if there is a possibility to get k in a row
-        
-        
-        # Horizontal offensive move
-        
-        
-        
-        
-        # check if there are k-1 set by the bot
-        # horizontal
-        
-        # Horizontal offensive move - check for the bot's cells in a row
-    
-        
-                    
-            
-                    
-        if len(cells_to_set) == 0: 
-            for row in range(board.n):
-                for col in range(board.m - board.k + 1):
-                    if all((board.array[row, col + i] == self.player_number) or (board.array[row, col + i] == 0) for i in range(0, board.k)):
-                        for i in range(0, board.k):
-                            cells_to_test.append([self.distance_to_edge(row, col+i, board),(row, col+i)]) if ([self.distance_to_edge(row, col+i, board),(row, col+i)] in empty_cells) else None
-            
-            print('test',cells_to_test)
-            
-            for cell_to_test in cells_to_test:
-                if [cell_to_test[0], (cell_to_test[1][0], (cell_to_test[1][1])+1)] in bot_cells or [cell_to_test[0], (cell_to_test[1][0], (cell_to_test[1][1])-1)] in bot_cells:
-                    if cells_to_test[i] not in cells_to_set:
-                        cells_to_set.append(cells_to_test[i])
-            
-            # for i in range(len(cells_to_test)):
-            #     if [cells_to_test[i][0], (cells_to_test[i][1][0], cells_to_test[i][1][1]+1)] in bot_cells or [cells_to_test[i][0], (cells_to_test[i][1][0], cells_to_test[i][1][1]-1)] in bot_cells:
-            #         if cells_to_test[i] not in cells_to_set:
-            #             cells_to_set.append(cells_to_test[i])
-            
-            # for i in range(len(cells_to_test)):
-            #     if [cells_to_test[i][0], (cells_to_test[i][1][0] +1, cells_to_test[i][1][1])] in bot_cells or [cells_to_test[i][0], (cells_to_test[i][1][0]-1, cells_to_test[i][1][1])] in bot_cells:
-            #         if cells_to_test[i] not in cells_to_set:
-            #             cells_to_set.append(cells_to_test[i])
-              
-            print('offensive',cells_to_set)
-        
-        #cells_to_set.sort(reverse = True) if len(cells_to_set) > 0 else None
-        
-        
-        # If set_list is empty the Bot chooses from all empty cells, but from the list with a higher probability
-        # for the middle cells
-        if len(cells_to_set) == 0:
-            cells_to_set = empty_cells
-        
-        cells_to_set = self.shuffle_by_ring(cells_to_set, board)
-        
-        #print(empty_cells)
-        # print(cells_to_set)
-        
-        #print(cells_to_set)
-        # Choose row and col from the first entry of cells_to_set
-        n, m = cells_to_set[0][1]
-        #print(f'Spalte {m+1} , Zeile {n+1}')
-        return super().make_move(board, m, n)
-    
-
-    
-    def find_empty_cells(self, board):
-        """
-        Finds and returns a list of empty cells in the given board.
-        
         Parameters:
-            board (Board): The board object representing the game board.
-        
-        Returns:
-            empty_cells (list): A list of empty cells in the board, sorted in descending order of distance to the edge.
-        """
-        
-        
-        empty_cells = []
-        for col in range(board.m):
-                for row in range(board.n):
-                    empty_cells.append([self.distance_to_edge(row, col, board),(row, col)]) if board.array[row, col] == 0 else None
-                empty_cells.sort()
-                empty_cells.reverse()
-                    
-        return empty_cells
-    
-    def find_bot_cells(self, board):
-        """function that locates the cells set by the player on the board
-
-        Returns:
-            tuple: list with tuples of cells set by the bot in the format (ring ,(n,m)) = (row, col)
-        """
-        
-        bot_cells = []
-        for col in range(board.m):
-                for row in range(board.n):
-                    bot_cells.append([self.distance_to_edge(row, col, board),(row, col)]) if board.array[row, col] == self.player_number else None
-                bot_cells.sort()
-                bot_cells.reverse()
-                    
-        return bot_cells
-    
-    
-    def distance_to_edge(self, row, col, board):
-        """function that calculates the distance to the edge of the board
-
-        Args:
             row (int): row on board
             col (int): col on board
             board (Board): board object
 
         Returns:
             int: _distance_ to the edge of the board
+            
         """
         distance = min(min(row, col), min(board.n-row-1, board.m-col-1))
         
         return distance
-        
-    def shuffle_by_ring(self, cells: list, board: Board):
-        """
-        Shuffles the given cells by ring using the provided board.
-        
-        Args:
-            cells (list): A list of cells to be shuffled.
-            board (Board): The board object used to calculate the number of rings.
-        
-        Returns:
-            list: The shuffled cells by ring
-        """
-        
-        shuffled_cells = []
-        num_rings = self.calculate_number_of_rings(board)
-        for i in range(num_rings,-1,-1):
-            cells_interim = []
-            for cell in cells:
-                if cell[0] == i:
-                    cells_interim.append(cell)
-                    shuffle(cells_interim)
-            shuffled_cells.extend(cells_interim)
-            
-        return shuffled_cells
-            
-            
-    def calculate_number_of_rings(self, board):
+    
+    
+    def _calculate_number_of_rings(self, board: Board):
         '''
         Calculates the number of rings on the board
         '''
@@ -570,33 +321,404 @@ class Bot3(Player):
         
         return int(num_rings)
     
+    
+    def _shuffle_by_ring(self, cells: list, board: Board):
+        """
+        Shuffles the given cells by ring using the provided board.
         
+        Parameters:
+            cells (list): A list of cells to be shuffled.
+            board (Board): The board object used to calculate the number of rings.
+        
+        Returns:
+            list: The shuffled cells by ring
+        """
+        
+        shuffled_cells = []
+        num_rings = self._calculate_number_of_rings(board)
+        for i in range(num_rings,-1,-1):
+            cells_interim = []
+            for cell in cells:
+                if cell[0] == i:
+                    cells_interim.append(cell)
+                    shuffle(cells_interim)
+            shuffled_cells.extend(cells_interim)
+            
+        return shuffled_cells
+    
+      
+class Bot3(Player):
+    
+    def __init__(self, number):
+        super().__init__("KI"+str(number), number)
+        
+    def make_move(self, board, m=None, n=None):
+        """
+        A method to make a move in the game board.
+
+        Parameters:
+            board: the game board
+            m: the column index (Default is None, needed for compatibility)
+            n: the row index (Default is None, needed for compatibility)
+
+        Returns:
+            Move on the game board as a player with the tuple (n, m)
+        """
+        
+        opponent = 1 if self.player_number == 2 else 2
+        
+        empty_board_cells = self._find_empty_cells(board)
+
+        cells_to_set = []
+        
+        #########################################################
+        # check if bot has k-1 in a row to skip all further steps
+        #########################################################
+        
+        # check horizontal 
+        self._check_sequence(board, board.k-1, self.player_number, empty_board_cells, cells_to_set, 0, 1)
+        # check vertical
+        self._check_sequence(board, board.k-1, self.player_number, empty_board_cells, cells_to_set, 1, 0)
+        # check main diagonal
+        self._check_sequence(board, board.k-1, self.player_number, empty_board_cells, cells_to_set, 1, 1)
+        # check anti diagonal
+        self._check_sequence(board, board.k-1, self.player_number, empty_board_cells, cells_to_set, -1, 1)
+        
+        
+        #####################################################################
+        # DEFENSIVE MOVE
+        #####################################################################
+        
+        if not cells_to_set: # empty list
+            # cells to set represents the cells that the bot hat determined to be valid for the next (good) move
+            cells_to_set_vert, cells_to_set_hor, cells_to_set_diag_l_r, cells_to_set_diag_r_l = [], [], [], []
+            
+            #cells_to_set = []
+            self._check_sequence(board, 2, opponent, empty_board_cells, cells_to_set_vert, 1, 0)
+            self._check_sequence(board, 2, opponent, empty_board_cells, cells_to_set_hor, 0, 1)
+            self._check_sequence(board, 2, opponent, empty_board_cells, cells_to_set_diag_l_r, 1, 1)
+            self._check_sequence(board, 2, opponent, empty_board_cells, cells_to_set_diag_r_l, -1, 1)
+            
+            rows, cols, diags_l_r, diags_r_l = self._find_rows_for_k(empty_board_cells, opponent, board)
+            
+            
+            # clean up cells_to_set, so that only the rows that are dagerous are left
+            
+            cells_to_set_hor, cells_to_set_vert, cells_to_set_diag_l_r, cells_to_set_diag_r_l = self._filter_cells(cells_to_set_hor, cells_to_set_vert, cells_to_set_diag_l_r, cells_to_set_diag_r_l, rows, cols, diags_l_r, diags_r_l)
+            
+            # for ring, cell in cells_to_set_hor:
+            #     if cell[0] not in rows:
+            #         cells_to_set_hor.remove((ring,cell))
+                    
+            # for ring, cell in cells_to_set_vert:
+            #     if cell[1] not in cols:
+            #         cells_to_set_vert.remove((ring, cell))
+        
+            # for ring, cell in cells_to_set_diag_l_r:
+            #     if cell not in diags_l_r:
+            #         cells_to_set_diag_l_r.remove((ring, cell))
+            
+            # for ring, cell in cells_to_set_diag_r_l:
+            #     if cell not in diags_r_l:
+            #         cells_to_set_diag_r_l.remove((ring,cell))
+                    
+            cells_to_set = list(set(cells_to_set_vert + cells_to_set_hor + cells_to_set_diag_l_r + cells_to_set_diag_r_l))
+        
+        
+        #####################################################################
+        # OFFENSIVE MOVE 
+        #####################################################################
+        
+        
+        if not cells_to_set: # empty list 
+            for check_for in range(2,-1, -1):
+                # cells to set represent the cells that the bot hat determined to be valid for the next (good) move
+                cells_to_set_vert, cells_to_set_hor, cells_to_set_diag_l_r, cells_to_set_diag_r_l = [], [], [], []
+                
+                self._check_sequence(board, check_for, self.player_number, empty_board_cells, cells_to_set_vert, 1, 0)
+                self._check_sequence(board, check_for, self.player_number, empty_board_cells, cells_to_set_hor, 0, 1)
+                self._check_sequence(board, check_for, self.player_number, empty_board_cells, cells_to_set_diag_l_r, 1, 1)
+                self._check_sequence(board, check_for, self.player_number, empty_board_cells, cells_to_set_diag_r_l, -1, 1)
+                
+                rows, cols, diags_l_r, diags_r_l = self._find_rows_for_k(empty_board_cells, self.player_number, board)
+                
+                # clean up cells_to_set, so that only the rows that are dagerous are left
+                
+                cells_to_set_hor, cells_to_set_vert, cells_to_set_diag_l_r, cells_to_set_diag_r_l = self._filter_cells(cells_to_set_hor, cells_to_set_vert, cells_to_set_diag_l_r, cells_to_set_diag_r_l, rows, cols, diags_l_r, diags_r_l)
+                
+                
+                # for ring, cell in cells_to_set_hor:
+                #     if cell[0] not in rows:
+                #         cells_to_set_hor.remove((ring,cell))
+                        
+                # for ring, cell in cells_to_set_vert:
+                #     if cell[1] not in cols:
+                #         cells_to_set_vert.remove((ring, cell))
+            
+                # for ring, cell in cells_to_set_diag_l_r:
+                #     if cell not in diags_l_r:
+                #         cells_to_set_diag_l_r.remove((ring, cell))
+                
+                # for ring, cell in cells_to_set_diag_r_l:
+                #     if cell not in diags_r_l:
+                #         cells_to_set_diag_r_l.remove((ring,cell))
+                        
+                cells_to_set = list(set(cells_to_set_vert + cells_to_set_hor + cells_to_set_diag_l_r + cells_to_set_diag_r_l))
+                
+                if cells_to_set:
+                    break
+            
+        
+        
+        # sort the list of cells to set in descending order of distance to the edge
+        cells_to_set.sort(reverse = True) if len(cells_to_set) > 0 else None
+        
+        # if no cells were found where the bot can block the opponent set in one of the empty cells
+        # should_add_ring is set to True because all the empty cells are shuffled by ring later. Adding the ring for the empty cells in the _check_sequence method 
+        # is not necessary and would make the code less readable
+        
+        #print(cells_to_set) 
+        
+        if not cells_to_set:
+            cells_to_set = self._find_empty_cells(board, should_add_ring = True)
+        # shuffle the list of cells to set by ring. The list stays sorted by distance to the edge in descending order.
+        cells_to_set = self._shuffle_by_ring(cells_to_set, board)
+        
+        
+        # Choose row and col from the first entry of cells_to_set. Index 1 is the tuple containing the row and col.
+        
+        n, m = cells_to_set[0][1]
+        
+        return super().make_move(board, m, n)
+       
+     
+    def _check_sequence(self, board: Board, check_for: int, player_number: int, empty_cells: list, cells_to_set: list, delta_row: int, delta_col: int):
+            """
+            Check if a sequence of consecutive cells is present on the board. If so add the previous 
+            and next cells to the list of cells to set if they are empty.
+            
+            Parameters:
+                board (Board): The game board.
+                check_for (int): The number of consecutive cells to check for.
+                player_number (int): The player number to check for.
+                empty_cells (list): List of empty cells on the board.
+                cells_to_set (list): List of cells to set for the bot.
+                delta_row (int): The change in row direction to calculate the next or previous cell.
+                delta_col (int): The change in column direction to calculate the next or previous cell.
+                
+            """
+            
+            
+            for row in range(board.n - (check_for - 1) * delta_row):
+                for col in range(board.m - (check_for - 1) * delta_col):
+                    # no other possibility was found besides continuing if the row is out of bounds, because the code wont run as intended otherwise
+                    if row >= board.n:
+                        continue
+                    if all(board.array[row + i * delta_row, col + i * delta_col] == player_number for i in range(check_for)):
+                        # calculate the previous and next cell
+                        prev_cell = (row - delta_row, col - delta_col)
+                        next_cell = (row + check_for * delta_row, col + check_for * delta_col)
+    
+                        # check if prev cell to found series is empty. The map function is used to extract the tuple which contains the cell from the cells_to_set
+                        if prev_cell in empty_cells and prev_cell not in list(map(lambda x: x[1], cells_to_set)):
+                            cells_to_set.append((self._distance_to_edge(*prev_cell, board), prev_cell))
+                        # check if next cell to found series is empty. The map function is used to extract the tuple which contains the cell from the cells_to_set
+                        if next_cell in empty_cells and next_cell not in list(map(lambda x: x[1], cells_to_set)):
+                            cells_to_set.append((self._distance_to_edge(*next_cell, board), next_cell))
+     
+
+        
+    def _find_rows_for_k(self, empty_cells: list, player_number: int, board: Board):
+        """
+        Find rows, columns, and diagonals with the possibility of k in a row for a given player 
+        i.e. places where there are k cells with either 0 or the player number in a row
+        
+        Parameters:
+            empty_cells (list): List of empty cells on the board
+            player_number (int): Number representing the player
+        
+        Returns:
+            tuple: A tuple containing the rows, columns, and diagonal coordinates with the possibility of k in a row
+        """
+
+        # kernel for the convolution, length is determined by k
+        kernel = np.ones(board.k)
+        
+        # The player has an opportunity if it is possible to get k in a row. We check that by searching the array for k in a row either number 0 or the player number.
+        # This technique can be used for the offense or defense
+        board_array = np.where((board.array == player_number) | (board.array == 0), 1, 0)
+        
+        # lists to store the rows, columns, and diagonals
+        rows, cols, diags_l_r, diags_r_l = [], [], [], []
+        
+        # Fill the lists with the numbers of the rows or cols where it is possible to get k in a row
+        # The list diags_l_r and diags_r_l are used to check the diagonals. The method differentiates to the rows and cols. For the diags we append all cells on
+        # the diags to the list, which were found to be useful for getting k in a row.
+        
+        # check diagonally if k in a row is possible for the player with the given number
+        for d in range(-board.n + board.k, board.m - board.k + 1):
+            diag = np.diagonal(board_array, offset = d)
+            if np.any(convolve(diag, kernel, mode = 'valid') == board.k):
+                if d < 0:
+                    diags_l_r.extend([(n - d, n) for n in range(min(board.n, board.m))])
+                else:
+                    diags_l_r.extend([(n, n + d) for n in range(min(board.n, board.m))])
+                
+                # make sure that only empty cells are able to be set
+                for cell in diags_l_r:
+                    if cell not in empty_cells:
+                        diags_l_r.remove(cell)
+            
+            anti_diag = np.diagonal(np.fliplr(board_array), offset = d)
+            if np.any(convolve(anti_diag, kernel, mode = 'valid') == board.k):
+                if d < 0:
+                    diags_r_l.extend([(n - d, m) for n, m in zip(range(board.n), range(board.m-1,-1,-1))])
+                else:
+                    diags_r_l.extend([(n, m + d) for n, m in zip(range(board.n), range(board.m-1,-1,-1))])
+                
+                # make sure that only empty cells are able to be set
+                for cell in diags_l_r:
+                    if cell not in empty_cells:
+                        diags_l_r.remove(cell)
+
+        # check all rows 
+        for row in range(board.n):
+            if np.any(convolve(board_array[row, :], kernel, mode = 'valid') == board.k):
+                rows.append(row)
+        
+        # check all columns      
+        for col in range(board.m):
+            if np.any(convolve(board_array[: ,col], kernel, mode = 'valid') == board.k):
+                cols.append(col)
+        
+        return rows, cols, diags_l_r, diags_r_l
+        
+    
+    def _filter_cells(self, cells_to_set_hor, cells_to_set_vert, cells_to_set_diag_l_r, cells_to_set_diag_r_l, rows, cols, diags_l_r, diags_r_l):
+        """
+        Filters the input cells based on the specified criteria and returns the filtered cells for horizontal, vertical, and diagonal directions.
+
+        Parameters:
+        - cells_to_set_hor: List of cells to set horizontally.
+        - cells_to_set_vert: List of cells to set vertically.
+        - cells_to_set_diag_l_r: List of cells to set diagonally from left to right.
+        - cells_to_set_diag_r_l: List of cells to set diagonally from right to left.
+        - rows: List of rows with a opportunity for k in a row
+        - cols: List of columns with a opportunity for k in a row
+        - diags_l_r: List of cells with a opportunity for k in a row from left to right.
+        - diags_r_l: List of cells with a opportunity for k in a row from right to left.
+
+        Returns:
+        - filtered_cells_hor: List of filtered cells for horizontal direction.
+        - filtered_cells_vert: List of filtered cells for vertical direction.
+        - filtered_cells_diag_l_r: List of filtered cells for diagonal direction from left to right.
+        - filtered_cells_diag_r_l: List of filtered cells for diagonal direction from right to left.
+        """
+        
+        filtered_cells_hor = [(ring, cell) for ring, cell in cells_to_set_hor if cell[0] in rows]
+        filtered_cells_vert = [(ring, cell) for ring, cell in cells_to_set_vert if cell[1] in cols]
+        filtered_cells_diag_l_r = [(ring, cell) for ring, cell in cells_to_set_diag_l_r if cell in diags_l_r]
+        filtered_cells_diag_r_l = [(ring, cell) for ring, cell in cells_to_set_diag_r_l if cell in diags_r_l]
+
+        return filtered_cells_hor, filtered_cells_vert, filtered_cells_diag_l_r, filtered_cells_diag_r_l     
+    
+    
+    def _find_empty_cells(self, board: Board, **kwargs) -> list:
+        """
+        Finds and returns a list of empty cells in the given board, sorted in descending order of distance to the edge.
+
+        Parameters:
+            board (Board): The board object representing the game board in the current state.
+            **kwargs: Additional keyword arguments.
+                should_add_ring (bool): Whether to add a ring to the list of empty cells. Default is False.
+
+        Returns:
+            empty_cells (list): A list of empty cells in the board, sorted in descending order of distance to the edge.
+        """
+
+        should_add_ring = kwargs.get("should_add_ring") if kwargs.get("should_add_ring") != None else False
+        
+        empty_cells = list(zip(*np.where(board.array == 0)))
+
+        # make a list of tuples (distance, (row, col))
+        ring_coords = [(self._distance_to_edge(row, col, board), (row, col)) for row, col in empty_cells]
+
+        # sort the list in descending order of distance to edge
+        ring_coords.sort(reverse=True)
+
+        # keep the ring if should_add_ring is True: (distance, (row, col)) else remove the ring: (row, col)
+        if should_add_ring:
+            empty_cells_sorted = ring_coords
+        else:
+            # extract the coordinates from the sorted tuples
+            empty_cells_sorted = [coords for _, coords in ring_coords]
+        
+
+        return empty_cells_sorted   
+    
+    
+    def _distance_to_edge(self, row: int, col: int, board: Board):
+        """function that calculates the distance to the edge of the board
+
+        Parameters:
+            row (int): row on board
+            col (int): col on board
+            board (Board): board object
+
+        Returns:
+            int: _distance_ to the edge of the board
+        """
+        distance = min(min(row, col), min(board.n-row-1, board.m-col-1))
+        
+        return distance
+    
+    def _shuffle_by_ring(self, cells: list, board: Board):
+        """
+        Shuffles the given cells by ring using the provided board.
+        
+        Parameters:
+            cells (list): A list of cells to be shuffled.
+            board (Board): The board object used to calculate the number of rings.
+        
+        Returns:
+            list: The shuffled cells by ring
+        """
+        
+        shuffled_cells = []
+        num_rings = self._calculate_number_of_rings(board)
+        for i in range(num_rings,-1,-1):
+            cells_interim = []
+            for cell in cells:
+                if cell[0] == i:
+                    cells_interim.append(cell)
+                    shuffle(cells_interim)
+            shuffled_cells.extend(cells_interim)
+            
+        return shuffled_cells
+    
+    
+    def _calculate_number_of_rings(self, board: Board):
+        '''
+        Calculates the number of rings on the board
+        
+        Parameters:
+            board (Board): board object
+        
+        Returns:
+            int: number of rings
+        '''
+        min_dimension = min(board.n, board.m)
+        if min_dimension % 2 == 0:
+            num_rings = min_dimension // 2 + 1
+        else:
+            num_rings = min_dimension / 2
+        
+        return int(num_rings)
+    
 
 if __name__ == "__main__":
     from Game import Game 
      
-    game = Game(Board(5, 5, 4), Player("PP", 1), Bot3(2))
-    game.player1.make_move(game.board, 0, 0)
-    #game.board.array[0][0] = 2
-    #game.board.array[0][1] = 2
-    game.board.array[1][1] = 2
-    game.board.array[1][2] = 2
-    game.board.array[3][3] = 2
-    #game.board.array[2][2] = 1
-    #game.board.array[4][0] = 1
-    game.board.array[1][3] = 2
-    #game.board.array[1][1] = 1
-    #game.board.array[0][4] = 2
-    game.board.display()
-    #game.player2.make_move(game.board, 1, 2)
-    #game.player1.make_move(game.board, 1, 3)
-    game.game_move(4,4)
-    game.board.display()
-    game.game_move(0,0)
-    game.board.display()
-    #game.game_move(2,4)
-    #game.game_move(0,0)
-    
-    #game.board.display()
-
+    game = Game(Board(5, 5, 4), Bot3(1), Bot3(2))
+    game.start()
 
