@@ -71,7 +71,7 @@ class Board:
         """
         def is_full():
             """
-            Check if the entire 2D array is full, returns a boolean.
+            Check if the entire array is full, returns a boolean.
             """
             for row in range(self.n):
                 for col in range(self.m):
