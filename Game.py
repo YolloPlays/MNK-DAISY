@@ -121,6 +121,9 @@ class Game:
             self.f.write(f"{string}\n")
         
 if __name__ == "__main__":
-    board = Board(5, 5, 4)
-    game = Game(board, Bot0(1), Bot0(2), should_log=True, repeat=1000, shuffle=True, should_print=False)
+    m = int(a) if (a:=input("m: ")) else 5
+    n = int(b) if (b:=input("n: ")) else 5
+    k = int(c) if (c:=input("k: ")) else 4
+    board = Board(m, n, k)
+    game = Game(board, Bot0(1), Bot0(2))
     game.start()
