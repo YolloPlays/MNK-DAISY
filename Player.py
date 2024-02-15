@@ -19,10 +19,18 @@ class Player():
             A tuple representing the coordinates of the move (m, n)
         """
         while True:
-            n = (int(input(f"{self.name}, bitte geben Sie die Zeile an: ")) - 1) \
-                if n is None else n
-            m = (int(input(f"{self.name}, bitte geben Sie die Spalte an: ")) - 1) \
-                if m is None else m
+            if n is None:
+                try:
+                    n = (int(input(f"{self.name}, bitte geben Sie die Zeile an: ")) - 1)
+                except ValueError:
+                    continue
+            else: n
+            if m is None:
+                try:
+                    m = (int(input(f"{self.name}, bitte geben Sie die Spalte an: ")) - 1)
+                except ValueError:
+                    continue
+            else: m
             if 0 <= m < board.m and 0 <= n < board.n:
                 if board.array[n, m] == 0: # <= Only necessary for raw input. GUI and Game handles this excption already
                     board.array[n, m] = self.player_number # Set methode im Board
@@ -41,5 +49,5 @@ if __name__ == "__main__":
     # Aufruf der Methoden zum Spielen
     board = Board()
     player1 = Player("Klaus", 1)
-    player1.make_move(board, 1 ,2)
+    player1.make_move(board)
     board.display()
