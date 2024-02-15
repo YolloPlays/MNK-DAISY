@@ -76,10 +76,15 @@ class Game:
         skip_input = True if len(input('Hit "Enter" to play with default values (m = 5, n = 5, k = 4). \nPress any "key + Enter" to enter custom values: ')) == 0 else False
         
         if not skip_input:
-            print('Please enter the size of the board: \n')
-            m = int(input("m: "))
-            n = int(input("n: "))
-            k = int(input("k: "))
+            while True:
+                print('Please enter the size of the board: \n')
+                m = int(input("m: "))
+                n = int(input("n: "))
+                k = int(input("k: "))
+                if k >= m or k >= n:
+                    print("k must be less than or equal to m and n. \n")
+                    continue
+                break
             board = Board(m, n, k)
         
         else:
