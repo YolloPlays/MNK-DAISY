@@ -41,7 +41,136 @@ class Game:
             except Exception:
                 print("File already created, beginning to append")
             self.f = open(os.path.join(log_path, f"log_{str(player1)[7:11]}_{str(player2)[7:11]}.csv"), "a")
+    
+    
+    @classmethod
+    def create_game(cls):
+        """
+        Interactively configures and creates a new game instance with customized settings or defaults.
         
+        This method guides the user through a series of choices to configure the game setup, including:
+        - Board size (m, n, k) with an option to use default values (5, 5, 4) or enter custom values.
+        - Selection of the game mode: Human vs. Human, Human vs. Bot, or Bot vs. Bot.
+        - For games involving humans, names for the human players are requested.
+        - For games involving bots, the user selects from available bot types for each bot player.
+        - Finally, the user decides which player starts the game.
+        
+        The method utilizes input validation to ensure that all user inputs are valid before proceeding
+        with the game configuration. If an invalid input is detected at any stage, the user is prompted
+        to re-enter a valid option.
+        
+        Parameters:
+            cls: Class method parameter used to instantiate the class with the configured settings.
+        
+        Returns:
+            A new instance of the class configured according to the user's selections.
+        
+        Note:
+            - The 'm', 'n', and 'k' parameters define the board's dimensions and the win condition, respectively.
+            - The method provides a flexible setup process, allowing for a variety of game configurations.
+            - The choice of who starts the game can significantly impact the gameplay experience.
+    
+        """
+        
+        
+        skip_input = True if len(input('Hit "Enter" to play with default values (m = 5, n = 5, k = 4). \nPress any "key + Enter" to enter custom values: ')) == 0 else False
+        
+        if not skip_input:
+            print('Please enter the size of the board: \n')
+            m = int(input("m: "))
+            n = int(input("n: "))
+            k = int(input("k: "))
+            board = Board(m, n, k)
+        
+        else:
+            board = Board()
+        
+        print(30*"-")
+        
+        bots = {"1": Bot0, "2": Bot1, "3": Bot2, "4": Bot3}
+        
+        while True:
+            print("Please choose a gamemode: \n" )
+            
+            gamemodes = {"1": "Human vs. Human", "2": "Human vs. Bot", "3": "Bot vs. Bot"}
+            for key, value in gamemodes.items():
+                print(f"{key}: {value}")
+            gamemode_choice = input("Please enter the number of the gamemode you would like to play: ").strip()
+            print(30*"-")
+            
+            if gamemode_choice not in gamemodes:
+                print("Invalid input. Please choose a valid gamemode number. \n")
+                continue
+            break
+        
+        if gamemode_choice == "1" or gamemode_choice == "2":
+            player1 = Player(input("Please enter the name for human player 1: "), 1)
+            print(30*"-")
+            if gamemode_choice == "1":
+                player2 = Player(input("Please enter the name for human player 2: "), 2)
+                print(30*"-")
+            else:
+                while True:
+                    print("Please choose a bot: \n")
+                    for key, value in bots.items():
+                        print(f"{key}: {value.__name__}")
+                    bot_choice = input("Please enter the number of the bot you would like to play against: ").strip()
+                    print(30*"-")
+                    if bot_choice not in bots:
+                        print("Invalid input. Please choose a valid bot number. \n")
+                        continue
+
+                    player2 = bots[bot_choice](2)
+                    break
+        
+        if gamemode_choice == "3":
+            while True:
+                print("Please choose a bot for player 1: \n")
+                for key, value in bots.items():
+                    print(f"{key}: {value.__name__}")
+                bot_choice = input("Please enter the number of the bot you would like to set as player 1: ").strip()
+                print(30*"-")
+
+                if bot_choice not in bots:
+                    print("Invalid input. Please choose a valid bot number. \n")
+                    continue
+
+                player1 = bots[bot_choice](1)
+                break
+            
+            while True:
+                print("Please choose a bot for player 2: \n")
+                for key, value in bots.items():
+                    print(f"{key}: {value.__name__}")
+                bot_choice = input("Please enter the number of the bot you would like to set as player 2: ").strip()
+                print(30*"-")
+                
+                if bot_choice not in bots:
+                    print("Invalid input. Please choose a valid bot number. \n")
+                    continue
+
+                player2 = bots[bot_choice](2)
+                
+                break
+        
+            
+        while True:
+            startplayer_choice = input(f"Who should start? (1: {player1.name}, 2: {player2.name}): ").strip()
+            print(30*"-")
+            if startplayer_choice == "1":
+                break
+            elif startplayer_choice == "2":
+                player_interim = player1
+                player1 = player2
+                player2 = player_interim
+                break
+            else:
+                print("Invalid Input. Please choose 1 or 2. ")
+                continue
+
+        return cls(board, player1, player2)
+    
+    
     def game_move(self, m, n):
         """
         A function to handle the game move, including player turn, player change, win check, and debugging.
@@ -84,6 +213,7 @@ class Game:
         if not self.gui: # <= Backwards compatibility for raw input
             self.game_loop()
         
+        
     def game_loop(self):
         """
         The game loop that iterates through the game rounds and player moves, 
@@ -92,8 +222,8 @@ class Game:
         for i in range(self.repeat):
             while self.game_started and not self.board.has_won() and not self.board.is_draw():
                 player = self.player1 if self.playerturn else self.player2
-                player.make_move(self.board)
                 self.board.display() if self.should_print else None
+                player.make_move(self.board)
                 self.playerturn = not self.playerturn
             if self.board.has_won():
                 winner = self.player2 if self.board.has_won()-1 else self.player1
@@ -119,11 +249,11 @@ class Game:
         """
         if self.should_log:
             self.f.write(f"{string}\n")
-        
+
+      
 if __name__ == "__main__":
-    m = int(a) if (a:=input("m: ")) else 5
-    n = int(b) if (b:=input("n: ")) else 5
-    k = int(c) if (c:=input("k: ")) else 4
-    board = Board(m, n, k)
-    game = Game(board, Bot0(1), Bot0(2))
-    game.start()
+    
+    game = Game.create_game()
+    if game:
+        game.start()
+    
