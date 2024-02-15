@@ -109,11 +109,27 @@ class Game:
             break
         
         if gamemode_choice == "1" or gamemode_choice == "2":
-            player1 = Player(input("Please enter the name for human player 1: "), 1)
-            print(30*"-")
-            if gamemode_choice == "1":
-                player2 = Player(input("Please enter the name for human player 2: "), 2)
+            while True:
+                name_player_1 = input("Please enter the name for human player 1: ")
                 print(30*"-")
+                if name_player_1 == "":
+                    print("Invalid input. Please enter a valid name. \n")
+                    continue
+                break
+            player1 = Player(name_player_1, 1)
+           
+            
+            if gamemode_choice == "1":
+                while True:
+                    name_player_2 = input("Please enter the name for human player 2: ")
+                    print(30*"-")
+                    if name_player_2 == "":
+                        print("Invalid input. Please enter a valid name. \n")
+                        continue
+                    break
+                player2 = Player(name_player_2, 2)
+                
+                
             else:
                 while True:
                     print("Please choose a bot: \n")
