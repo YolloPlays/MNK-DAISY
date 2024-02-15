@@ -390,7 +390,7 @@ class Bot3(Player):
         #####################################################################
         
         if not cells_to_set: # empty list
-            for check_for in range(3, 1, -1):
+            for check_for in range(board.k-1, 1, -1):
                 # cells to set represents the cells that the bot hat determined to be valid for the next (good) move
                 cells_to_set_vert, cells_to_set_hor, cells_to_set_diag_l_r, cells_to_set_diag_r_l = [], [], [], []
                 
