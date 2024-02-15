@@ -32,6 +32,10 @@ class Game:
         if self.should_log:
             log_path = os.path.join(os.getcwd(), "Logs")
             try:
+                os.mkdir(log_path)
+            except Exception:
+                print("Logs folder might already exist.")
+            try:
                 with open(os.path.join(log_path, f"log_{str(player1)[7:11]}_{str(player2)[7:11]}.csv"), "x") as f:
                     f.write("starting player,winning number\n")
             except Exception:
